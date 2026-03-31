@@ -1,0 +1,485 @@
+---
+const initialCode = `wadah barudak = ["Curug", "Legok", "Bitung", "Legok"]
+ngomong("Sapa barudak kabeh: ") atuh
+
+keur wadah i = 0; i < 3; i = i + 1 {
+  ngomong("Halo " + barudak[i] + " Jasa!") atuh
+}
+
+wadah status = bener
+mun status {
+  ngomong("CRG Gaskeun Geura!") jasa atuh
+} munteu {
+  ngomong("Acan bener bae...") atuh
+}`;
+---
+
+<div class="playground-container">
+  <div class="editor-card glass neon-shadow">
+    <div class="card-header">
+      <div class="header-left">
+        <div class="file-dots">
+          <span class="fdot red"></span>
+          <span class="fdot yellow"></span>
+          <span class="fdot green"></span>
+        </div>
+        <span class="file-name">editor.crg</span>
+        <select id="template-select" class="template-dropdown">
+          <option value="default">Default CRG</option>
+          <option value="cek_umur">Cek Umur</option>
+          <option value="hitung_mundur">Hitung Mundur</option>
+          <option value="fibonacci">Fibonacci</option>
+        </select>
+      </div>
+      <div class="header-right">
+        <button id="copy-btn" class="icon-btn" title="Salin Kode">
+          <i class="ph-fill ph-copy"></i>
+        </button>
+        <button id="share-btn" class="icon-btn" title="Bagiin Kode">
+          <i class="ph-fill ph-share-network"></i>
+        </button>
+        <button id="run-btn" class="run-button">
+          <i class="ph-fill ph-play"></i>
+          Jalanin Jasa!
+        </button>
+      </div>
+    </div>
+    <div class="editor-body">
+      <div id="line-numbers" class="line-numbers" aria-hidden="true"></div>
+      <div class="editor-wrapper">
+        <div id="highlight-layer" class="highlight-layer" aria-hidden="true"></div>
+        <textarea id="editor" spellcheck="false" autocomplete="off">{initialCode}</textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="terminal-card glass">
+    <div class="card-header">
+      <div class="header-left">
+        <i class="ph-fill ph-terminal-window" style="color: var(--teal)"></i>
+        <span>Terminal Output</span>
+      </div>
+      <button id="clear-btn" class="icon-btn" title="Bersihkan Output">
+        <i class="ph-fill ph-eraser"></i>
+      </button>
+    </div>
+    <div id="output" class="output-content">
+      <div class="output-welcome">
+        <i class="ph-fill ph-terminal-window"></i>
+        <p>Siap njalankeun kode CRG...</p>
+        <p class="output-hint">Pencet <kbd>Ctrl+Enter</kbd> pikeun gancang!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  import { Interpreter } from '../lib/interpreter.js';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const editor = document.getElementById('editor') as HTMLTextAreaElement | null;
+    const runBtn = document.getElementById('run-btn') as HTMLButtonElement | null;
+    const copyBtn = document.getElementById('copy-btn') as HTMLButtonElement | null;
+    const shareBtn = document.getElementById('share-btn') as HTMLButtonElement | null;
+    const clearBtn = document.getElementById('clear-btn') as HTMLButtonElement | null;
+    const output = document.getElementById('output') as HTMLDivElement | null;
+    const templateSelect = document.getElementById('template-select') as HTMLSelectElement | null;
+    const lineNumbers = document.getElementById('line-numbers') as HTMLDivElement | null;
+    const highlightLayer = document.getElementById('highlight-layer') as HTMLDivElement | null;
+    const toast = document.getElementById('toast') as HTMLDivElement | null;
+
+    if (!editor || !runBtn || !output) {
+      console.error('[CRG] Element playground tidak ketemu!');
+      return;
+    }
+
+    const templates: Record<string, string> = {
+      default: editor.value,
+      cek_umur: `wadah umur = 20
+ngomong("Umur maneh: " + umur) atuh
+
+mun umur > 17 {
+  ngomong("Geus kolot gening!") jasa atuh
+} munteu {
+  ngomong("Masih budak keneh.") atuh
+}`,
+      hitung_mundur: `wadah angka = 5
+ngomong("Siap-siap meluncur...") atuh
+
+keur angka > 0 {
+  ngomong(angka) atuh
+  angka = angka - 1
+}
+
+ngomong("Maburrr!") jasa atuh`,
+      fibonacci: `wadah a = 0
+wadah b = 1
+wadah n = 10
+
+ngomong("Deret Fibonacci Curug:") atuh
+
+keur n > 0 {
+  ngomong(a) atuh
+  wadah temp = b
+  b = a + b
+  a = temp
+  n = n - 1
+}
+
+ngomong("Sakitu ti abdi!") jasa atuh`
+    };
+
+    // Load dari URL share
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedCode = urlParams.get('code');
+    if (sharedCode) {
+      try { editor.value = decodeURIComponent(atob(sharedCode)); } catch {}
+    }
+
+    // Toast
+    function showToast(msg: string, isError = false) {
+      if (!toast) return;
+      toast.textContent = msg;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      setTimeout(() => { toast.className = 'toast'; }, 2500);
+    }
+
+    // Syntax highlight
+    const KW = ['wadah','manten','mun','munteu','keur','lakon','balik','bener','salah','bae','nyaho'];
+    const FN = ['ngomong','beja','tanya','nanya'];
+
+    function highlight(code: string): string {
+      let h = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      h = h.replace(/"[^"\n]*"|'[^'\n]*'/g, s => `<span class="hl-str">${s}</span>`);
+      h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-num">$1</span>');
+      h = h.replace(/\b(jasa)\b/g, '<span class="hl-jasa">$1</span>');
+      h = h.replace(/\b(atuh)\b/g, '<span class="hl-atuh">$1</span>');
+      FN.forEach(k => { h = h.replace(new RegExp(`\\b(${k})\\b`, 'g'), '<span class="hl-fn">$1</span>'); });
+      KW.forEach(k => { h = h.replace(new RegExp(`\\b(${k})\\b`, 'g'), '<span class="hl-kw">$1</span>'); });
+      h = h.replace(/(#[^\n]*)/g, '<span class="hl-comment">$1</span>');
+      return h;
+    }
+
+    function renderHighlight() {
+      if (!highlightLayer) return;
+      highlightLayer.scrollTop = editor.scrollTop;
+      highlightLayer.scrollLeft = editor.scrollLeft;
+      highlightLayer.innerHTML = highlight(editor.value) + '\n';
+    }
+
+    function renderLineNumbers() {
+      if (!lineNumbers) return;
+      const count = editor.value.split('\n').length;
+      lineNumbers.innerHTML = Array.from({length: count}, (_, i) => `<span>${i+1}</span>`).join('');
+      lineNumbers.scrollTop = editor.scrollTop;
+    }
+
+    editor.addEventListener('input', () => { renderHighlight(); renderLineNumbers(); });
+    editor.addEventListener('scroll', () => {
+      if (highlightLayer) highlightLayer.scrollTop = editor.scrollTop;
+      if (lineNumbers) lineNumbers.scrollTop = editor.scrollTop;
+    });
+
+    renderHighlight();
+    renderLineNumbers();
+
+    // Template switch
+    templateSelect?.addEventListener('change', e => {
+      const val = (e.target as HTMLSelectElement).value;
+      if (templates[val]) {
+        editor.value = templates[val];
+        renderHighlight();
+        renderLineNumbers();
+      }
+    });
+
+    // Run code
+    const runCode = () => {
+      output.innerHTML = '';
+      const t0 = performance.now();
+
+      const interp = new Interpreter((msg: string) => {
+        const div = document.createElement('div');
+        div.className = 'output-line';
+        const prompt = document.createElement('span');
+        prompt.className = 'out-prompt';
+        prompt.textContent = '\u276f ';
+        div.appendChild(prompt);
+        div.appendChild(document.createTextNode(String(msg)));
+        output.appendChild(div);
+        output.scrollTop = output.scrollHeight;
+      });
+
+      interp.execute(editor.value);
+
+      const footer = document.createElement('div');
+      footer.className = 'output-footer';
+      footer.textContent = `Selesai dalam ${(performance.now() - t0).toFixed(1)}ms`;
+      output.appendChild(footer);
+    };
+
+    runBtn.addEventListener('click', runCode);
+
+    editor.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); return; }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = editor.selectionStart, en = editor.selectionEnd;
+        editor.value = editor.value.substring(0,s) + '  ' + editor.value.substring(en);
+        editor.selectionStart = editor.selectionEnd = s + 2;
+        renderHighlight(); renderLineNumbers();
+      }
+    });
+
+    copyBtn?.addEventListener('click', () => {
+      navigator.clipboard.writeText(editor.value)
+        .then(() => showToast('Kode berhasil disalin!'))
+        .catch(() => showToast('Gagal nyalin kode', true));
+    });
+
+    shareBtn?.addEventListener('click', () => {
+      try {
+        const encoded = btoa(encodeURIComponent(editor.value));
+        const url = `${location.origin}${location.pathname}?code=${encoded}`;
+        navigator.clipboard.writeText(url).then(() => showToast('Link disalin! Bagiin ke babaturan!'));
+      } catch { showToast('Gagal bikin link', true); }
+    });
+
+    clearBtn?.addEventListener('click', () => {
+      output.innerHTML = '<div class="output-welcome"><i class="ph-fill ph-terminal-window"></i><p>Output dibersihkan.</p></div>';
+    });
+  });
+</script>
+
+<style>
+  .playground-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    height: 600px;
+  }
+  .editor-card, .terminal-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 16px;
+  }
+  .card-header {
+    padding: 10px 16px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .file-dots { display: flex; gap: 5px; }
+  .fdot { width: 11px; height: 11px; border-radius: 50%; }
+  .fdot.red    { background: #ff5f57; }
+  .fdot.yellow { background: #febc2e; }
+  .fdot.green  { background: #28c840; }
+  .file-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .template-dropdown {
+    background: var(--bg-card);
+    color: var(--text-soft);
+    border: 1px solid var(--border);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .template-dropdown:hover { border-color: var(--teal); color: var(--text); }
+  .template-dropdown option { background: var(--bg); color: var(--text); }
+  .icon-btn {
+    background: var(--accent-dim);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover {
+    background: var(--accent);
+    color: white;
+    border-color: transparent;
+    transform: scale(1.08);
+  }
+  .run-button {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .run-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px var(--accent-dim);
+  }
+  .run-button:active { transform: scale(0.97); }
+
+  /* Editor Layout */
+  .editor-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  .line-numbers {
+    width: 44px;
+    flex-shrink: 0;
+    padding: 14px 0;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    overflow: hidden;
+    user-select: none;
+    border-right: 1px solid var(--border);
+    background: var(--bg-surface);
+    opacity: 0.5;
+  }
+  .line-numbers span { display: block; padding-right: 10px; }
+  .editor-wrapper { position: relative; flex: 1; overflow: hidden; }
+  .highlight-layer, #editor {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    margin: 0;
+    padding: 14px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    tab-size: 2;
+    white-space: pre;
+    overflow: auto;
+    box-sizing: border-box;
+  }
+  .highlight-layer {
+    color: transparent;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  #editor {
+    background: transparent;
+    border: none;
+    color: var(--text-soft);
+    resize: none;
+    outline: none;
+    caret-color: var(--teal);
+    z-index: 2;
+  }
+
+  /* Syntax Colors */
+  :global(.hl-kw)      { color: var(--accent); font-weight: 700; }
+  :global(.hl-fn)      { color: var(--teal); }
+  :global(.hl-str)     { color: #86efac; }
+  :global(.hl-num)     { color: #fb923c; }
+  :global(.hl-jasa)    { color: #f59e0b; font-weight: 700; }
+  :global(.hl-atuh)    { color: var(--text-muted); }
+  :global(.hl-comment) { color: var(--text-muted); font-style: italic; }
+
+  /* Terminal */
+  .output-content {
+    flex: 1;
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .output-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    text-align: center;
+    opacity: 0.7;
+  }
+  .output-welcome i { font-size: 2rem; opacity: 0.3; }
+  .output-welcome p { margin: 0; }
+  .output-hint { font-size: 0.8rem; }
+  .output-welcome kbd {
+    background: var(--bg-card);
+    border: 1px solid var(--border-mid);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 0.78rem;
+  }
+  .output-line { line-height: 1.6; color: var(--text); padding: 1px 0; }
+  .out-prompt { color: var(--teal); font-weight: 700; }
+  .output-footer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border-mid);
+    color: var(--text);
+    padding: 11px 22px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 9999;
+    white-space: nowrap;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.error { border-color: rgba(239, 68, 68, 0.5); color: #f87171; }
+
+  @media (max-width: 900px) {
+    .playground-container {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+    .editor-card { height: 420px; }
+    .terminal-card { height: 320px; }
+    .template-dropdown { display: none; }
+  }
+</style>

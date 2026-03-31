@@ -1,0 +1,135 @@
+---
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="id" data-theme="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="author" content="Barudak Curug" />
+		<meta property="og:title" content="CRG — Curug Language" />
+		<meta property="og:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+		<script src="https://unpkg.com/@phosphor-icons/web"></script>
+		<!-- Theme: apply before paint to avoid flash -->
+		<script is:inline>
+			(function() {
+				const saved = localStorage.getItem('crg-theme');
+				const preferred = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+				document.documentElement.setAttribute('data-theme', saved || preferred);
+			})();
+		</script>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+	/* ===== DESIGN TOKENS: Dark Mode (default) ===== */
+	:root,
+	[data-theme="dark"] {
+		--bg:          #08080b;
+		--bg-surface:  rgba(16, 16, 22, 0.85);
+		--bg-card:     rgba(20, 20, 28, 0.75);
+		--border:      rgba(255, 255, 255, 0.08);
+		--border-mid:  rgba(255, 255, 255, 0.14);
+		--accent:      #a855f7;
+		--accent-dim:  rgba(168, 85, 247, 0.15);
+		--teal:        #2dd4bf;
+		--teal-dim:    rgba(45, 212, 191, 0.12);
+		--text:        #f1f5f9;
+		--text-muted:  #64748b;
+		--text-soft:   #94a3b8;
+		--shadow:      0 0 28px rgba(168, 85, 247, 0.18);
+		--body-bg-1:   rgba(168, 85, 247, 0.12);
+		--body-bg-2:   rgba(45, 212, 191, 0.07);
+
+		/* Legacy compatibility */
+		--accent-neon: var(--accent);
+		--accent-teal: var(--teal);
+		--text-main:   var(--text);
+		--bg-dark:     var(--bg);
+	}
+
+	/* ===== DESIGN TOKENS: Light Mode ===== */
+	[data-theme="light"] {
+		--bg:          #f4f6fb;
+		--bg-surface:  rgba(255, 255, 255, 0.9);
+		--bg-card:     rgba(255, 255, 255, 0.8);
+		--border:      rgba(0, 0, 0, 0.07);
+		--border-mid:  rgba(0, 0, 0, 0.12);
+		--accent:      #7c3aed;
+		--accent-dim:  rgba(124, 58, 237, 0.1);
+		--teal:        #0d9488;
+		--teal-dim:    rgba(13, 148, 136, 0.1);
+		--text:        #0f172a;
+		--text-muted:  #64748b;
+		--text-soft:   #475569;
+		--shadow:      0 4px 24px rgba(124, 58, 237, 0.12);
+		--body-bg-1:   rgba(124, 58, 237, 0.06);
+		--body-bg-2:   rgba(13, 148, 136, 0.05);
+
+		/* Legacy compatibility */
+		--accent-neon: var(--accent);
+		--accent-teal: var(--teal);
+		--text-main:   var(--text);
+		--bg-dark:     var(--bg);
+	}
+
+	/* ===== BASE ===== */
+	*, *::before, *::after { box-sizing: border-box; }
+
+	html {
+		font-family: 'Space Grotesk', sans-serif;
+		background: var(--bg);
+		color: var(--text);
+		scroll-behavior: smooth;
+		scroll-padding-top: 90px;
+		transition: background 0.3s, color 0.3s;
+	}
+
+	body {
+		margin: 0;
+		padding: 0;
+		min-height: 100vh;
+		background: 
+			radial-gradient(ellipse at 0% 0%, var(--body-bg-1) 0%, transparent 55%),
+			radial-gradient(ellipse at 100% 100%, var(--body-bg-2) 0%, transparent 55%),
+			var(--bg);
+		transition: background 0.3s;
+	}
+
+	code {
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 0.88em;
+		padding: 2px 6px;
+		background: var(--accent-dim);
+		color: var(--accent);
+		border-radius: 4px;
+	}
+
+	/* ===== GLASS UTILITY ===== */
+	.glass {
+		background: var(--bg-card);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid var(--border);
+		border-radius: 16px;
+	}
+
+	.neon-shadow {
+		box-shadow: var(--shadow);
+	}
+</style>

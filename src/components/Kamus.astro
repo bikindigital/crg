@@ -1,0 +1,167 @@
+---
+const categories = [
+  {
+    name: 'Variabel & Data',
+    keywords: [
+      { s: 'wadah', e: 'let / var', d: 'Wadah nyimpen data (Variable).' },
+      { s: 'manten', e: 'const', d: 'Data nu tetep, geus aya (Constant).' },
+      { s: 'barudak', e: 'Array', d: 'Kumpulan data / barisan (List).' },
+      { s: 'bae', e: 'null', d: 'Eweuh nanaon, biarin bae (Null).' },
+      { s: 'acan', e: 'undefined', d: 'Teuing acan aya (Undefined).' },
+      { s: 'konci', e: 'key', d: 'Konci data (Object key).' },
+    ]
+  },
+  {
+    name: 'Kaluaran & Input',
+    keywords: [
+      { s: 'beja / ngomong', e: 'print', d: 'Ngabejaan / Nyetak hasil (Output).' },
+      { s: 'tanya / nanya', e: 'input', d: 'Nanya ka user (Prompt).' },
+    ]
+  },
+  {
+    name: 'Logika & Kondisi',
+    keywords: [
+      { s: 'mun', e: 'if', d: 'Lamun kieu (Condition).' },
+      { s: 'munteu', e: 'else', d: 'Mun henteu kieu (Else).' },
+      { s: 'sabab', e: 'switch', d: 'Sabab pilihanna loba (Switch).' },
+      { s: 'kasus', e: 'case', d: 'Pilihan kasusna (Case).' },
+      { s: 'baku', e: 'default', d: 'Pilihan baku (Default).' },
+      { s: 'nyaho', e: 'bool', d: 'Nyaho bener/salah (Boolean).' },
+      { s: 'teu', e: '!', d: 'Henteu / Lain (Not Operator).' },
+    ]
+  },
+  {
+    name: 'Perulangan & Fungsi',
+    keywords: [
+      { s: 'keur', e: 'for / while', d: 'Keur sakitu balikan (Loop).' },
+      { s: 'deui', e: 'repeat', d: 'Ulang deui (Do while).' },
+      { s: 'lakon', e: 'function', d: 'Jalanin lakonna (Main logic).' },
+      { s: 'balik', e: 'return', d: 'Hasilna balik deui (Return).' },
+      { s: 'geura', e: 'exec', d: 'Gaskeun geura! (Run main).' },
+      { s: 'enggeus', e: 'break', d: 'Enggeus sakitu bae (Break).' },
+      { s: 'tuluy', e: 'continue', d: 'Tuluykeun bae (Continue).' },
+    ]
+  },
+  {
+    name: 'Modern (Async / Class)',
+    keywords: [
+      { s: 'isuk', e: 'async', d: 'Engke isuk pageto (Asynchronous).' },
+      { s: 'janji', e: 'promise', d: 'Janji heula nya (Promise).' },
+      { s: 'saka', e: 'await', d: 'Saka sakeudeung (Await).' },
+      { s: 'imah', e: 'class', d: 'Struktur imahna (Class/Module).' },
+      { s: 'kolot', e: 'super', d: 'Indung bapakna (Parent class).' },
+      { s: 'jauh', e: 'fetch', d: 'Ngala ti jauh (Remote API).' },
+    ]
+  },
+  {
+    name: 'Particle & Error',
+    keywords: [
+      { s: 'jasa', e: '!! / *100', d: 'Banget / Suffix penting (Emphasis).' },
+      { s: 'atuh', e: ';', d: 'Pemanis kalimat (Statement ender).' },
+      { s: 'kagok', e: 'error', d: 'Kagok macet (Exception).' },
+      { s: 'cobaan', e: 'try', d: 'Cobaan heula (Try block).' },
+      { s: 'sanya', e: 'catch', d: 'Sanya lamun gagal (Catch block).' },
+    ]
+  }
+];
+---
+<div class="kamus-section glass neon-shadow">
+  <div class="kamus-header">
+    <i class="ph-fill ph-book-bookmark kamus-icon"></i>
+    <h2>Kamus CRG Lengkap</h2>
+  </div>
+  
+  <div class="kamus-grid">
+    {categories.map(cat => (
+      <div class="category-block">
+        <h3>{cat.name}</h3>
+        <div class="keyword-list">
+          {cat.keywords.map(k => (
+            <div class="keyword-item">
+              <div class="keyword-header">
+                <code class="sucutang">{k.s}</code>
+                <code class="logic">{k.e}</code>
+              </div>
+              <p class="desc">{k.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .kamus-section {
+    padding: 32px;
+  }
+  .kamus-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+    justify-content: center;
+  }
+  .kamus-icon {
+    font-size: 2rem;
+    color: var(--teal);
+  }
+  h2 {
+    margin: 0;
+    color: var(--teal);
+    font-size: 1.8rem;
+    letter-spacing: -0.02em;
+  }
+  .kamus-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 32px;
+  }
+  .category-block h3 {
+    color: var(--accent);
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .keyword-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .keyword-item {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.2s;
+  }
+  .keyword-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateX(4px);
+  }
+  .keyword-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .sucutang {
+    color: var(--teal);
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+  .logic {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    background: var(--bg-surface);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .desc {
+    color: var(--text-soft);
+    font-size: 0.84rem;
+    margin: 0;
+  }
+</style>
