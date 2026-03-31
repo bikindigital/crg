@@ -10,14 +10,29 @@ const { title } = Astro.props;
 <html lang="id" data-theme="dark">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="author" content="Barudak Curug" />
-		<meta property="og:title" content="CRG — Curug Language" />
-		<meta property="og:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
+		
+		<!-- Primary Meta Tags -->
+		<meta name="title" content={title} />
+		<meta name="description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://crg.id" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+		<meta property="og:image" content="/thumbnail.png" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://crg.id" />
+		<meta property="twitter:title" content={title} />
+		<meta property="twitter:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+		<meta property="twitter:image" content="/thumbnail.png" />
+
+		<link rel="icon" type="image/png" href="/logo.png" />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">

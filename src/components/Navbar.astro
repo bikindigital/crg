@@ -4,12 +4,12 @@
 <!-- Desktop Pill Nav -->
 <nav class="desktop-nav glass neon-shadow" id="desktop-nav">
   <a href="#top" class="nav-brand">
-    <i class="ph-fill ph-brackets-curly"></i>
+    <img src="/logo.png" alt="CRG Logo" class="nav-logo" />
     <span>CRG</span>
   </a>
   <div class="nav-links">
     <a href="#top" class="nav-item" data-nav="top">Beranda</a>
-    <a href="#editor" class="nav-item" data-nav="editor">Playground</a>
+    <a href="#playground" class="nav-item" data-nav="playground">Playground</a>
     <a href="#kamus" class="nav-item" data-nav="kamus">Kamus</a>
   </div>
   <div class="nav-actions">
@@ -45,7 +45,7 @@
     <i class="ph-fill ph-house"></i>
     <span>Beranda</span>
   </a>
-  <a href="#editor" class="mobile-nav-item" data-nav="editor">
+  <a href="#playground" class="mobile-nav-item" data-nav="playground">
     <i class="ph-fill ph-terminal-window"></i>
     <span>Playground</span>
   </a>
@@ -86,7 +86,17 @@
     text-decoration: none;
     letter-spacing: -0.01em;
   }
-  .nav-brand i { font-size: 1.4rem; }
+  .nav-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 8px var(--accent-glow));
+  }
+  .nav-brand span {
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
   .nav-links {
     display: flex;
     gap: 4px;

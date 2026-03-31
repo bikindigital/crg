@@ -4,7 +4,7 @@
  */
 
 // 1. TOKEN TYPES
-export const TOKEN_TYPES = {
+const TOKEN_TYPES = {
   ILLEGAL: 'ILLEGAL', EOF: 'EOF',
   IDENT: 'IDENT', INT: 'INT', STRING: 'STRING',
   ASSIGN: '=', PLUS: '+', MINUS: '-', BANG: '!',
@@ -31,7 +31,7 @@ const KEYWORDS = {
 };
 
 // 2. LEXER
-export class Lexer {
+class Lexer {
   constructor(input) {
     this.input = input;
     this.position = 0;
@@ -149,7 +149,7 @@ const precedencesMap = {
   [TOKEN_TYPES.JASA]: PRECEDENCES.POSTFIX
 };
 
-export class Parser {
+class Parser {
   constructor(lexer) {
     this.lexer = lexer;
     this.errors = [];
@@ -443,7 +443,7 @@ export class Parser {
 }
 
 // 4. ENVIRONMENT (Scoping)
-export class Environment {
+class Environment {
   constructor(outer = null) {
     this.store = new Map();
     this.outer = outer;
@@ -470,7 +470,7 @@ export class Environment {
 }
 
 // 5. EVALUATOR
-export class Evaluator {
+class Evaluator {
   constructor(outputCallback) {
     this.outputCallback = outputCallback;
   }
@@ -618,7 +618,7 @@ export class Evaluator {
 }
 
 // 6. MAIN INTERPRETER WRAPPER
-export class Interpreter {
+class Interpreter {
   constructor(outputCallback) {
     this.outputCallback = outputCallback || console.log;
     this.globalEnv = new Environment();

@@ -15,6 +15,7 @@ mun status {
 ---
 
 <div class="playground-container">
+  <!-- Editor -->
   <div class="editor-card glass neon-shadow">
     <div class="card-header">
       <div class="header-left">
@@ -40,7 +41,7 @@ mun status {
         </button>
         <button id="run-btn" class="run-button">
           <i class="ph-fill ph-play"></i>
-          Jalanin Jasa!
+          <span>Jalanin Jasa!</span>
         </button>
       </div>
     </div>
@@ -53,6 +54,7 @@ mun status {
     </div>
   </div>
 
+  <!-- Terminal -->
   <div class="terminal-card glass">
     <div class="card-header">
       <div class="header-left">
@@ -75,182 +77,197 @@ mun status {
 
 <div id="toast" class="toast"></div>
 
-<script>
-  import { Interpreter } from '../lib/interpreter.js';
+<!-- Load interpreter as plain script (not bundled by Vite) -->
+<script src="/interpreter.js" is:inline></script>
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const editor = document.getElementById('editor') as HTMLTextAreaElement | null;
-    const runBtn = document.getElementById('run-btn') as HTMLButtonElement | null;
-    const copyBtn = document.getElementById('copy-btn') as HTMLButtonElement | null;
-    const shareBtn = document.getElementById('share-btn') as HTMLButtonElement | null;
-    const clearBtn = document.getElementById('clear-btn') as HTMLButtonElement | null;
-    const output = document.getElementById('output') as HTMLDivElement | null;
-    const templateSelect = document.getElementById('template-select') as HTMLSelectElement | null;
-    const lineNumbers = document.getElementById('line-numbers') as HTMLDivElement | null;
-    const highlightLayer = document.getElementById('highlight-layer') as HTMLDivElement | null;
-    const toast = document.getElementById('toast') as HTMLDivElement | null;
+<!-- Inline script runs synchronously after body is rendered -->
+<script is:inline>
+  (function() {
+    var editor        = document.getElementById('editor');
+    var runBtn        = document.getElementById('run-btn');
+    var copyBtn       = document.getElementById('copy-btn');
+    var shareBtn      = document.getElementById('share-btn');
+    var clearBtn      = document.getElementById('clear-btn');
+    var output        = document.getElementById('output');
+    var templateSel   = document.getElementById('template-select');
+    var lineNumbers   = document.getElementById('line-numbers');
+    var hlLayer       = document.getElementById('highlight-layer');
+    var toast         = document.getElementById('toast');
 
     if (!editor || !runBtn || !output) {
-      console.error('[CRG] Element playground tidak ketemu!');
+      console.error('[CRG] Elemen teu kapanggih!', {editor: editor, runBtn: runBtn, output: output});
       return;
     }
 
-    const templates: Record<string, string> = {
+    // ---- Templates ----
+    var TPL = {
       default: editor.value,
-      cek_umur: `wadah umur = 20
-ngomong("Umur maneh: " + umur) atuh
-
-mun umur > 17 {
-  ngomong("Geus kolot gening!") jasa atuh
-} munteu {
-  ngomong("Masih budak keneh.") atuh
-}`,
-      hitung_mundur: `wadah angka = 5
-ngomong("Siap-siap meluncur...") atuh
-
-keur angka > 0 {
-  ngomong(angka) atuh
-  angka = angka - 1
-}
-
-ngomong("Maburrr!") jasa atuh`,
-      fibonacci: `wadah a = 0
-wadah b = 1
-wadah n = 10
-
-ngomong("Deret Fibonacci Curug:") atuh
-
-keur n > 0 {
-  ngomong(a) atuh
-  wadah temp = b
-  b = a + b
-  a = temp
-  n = n - 1
-}
-
-ngomong("Sakitu ti abdi!") jasa atuh`
+      cek_umur: [
+        'wadah umur = 20',
+        'ngomong("Umur maneh: " + umur) atuh',
+        '',
+        'mun umur > 17 {',
+        '  ngomong("Geus kolot gening!") jasa atuh',
+        '} munteu {',
+        '  ngomong("Masih budak keneh.") atuh',
+        '}'
+      ].join('\n'),
+      hitung_mundur: [
+        'wadah angka = 5',
+        'ngomong("Siap-siap meluncur...") atuh',
+        '',
+        'keur angka > 0 {',
+        '  ngomong(angka) atuh',
+        '  angka = angka - 1',
+        '}',
+        '',
+        'ngomong("Maburrr!") jasa atuh'
+      ].join('\n'),
+      fibonacci: [
+        'wadah a = 0',
+        'wadah b = 1',
+        'wadah n = 10',
+        '',
+        'ngomong("Deret Fibonacci Curug:") atuh',
+        '',
+        'keur n > 0 {',
+        '  ngomong(a) atuh',
+        '  wadah temp = b',
+        '  b = a + b',
+        '  a = temp',
+        '  n = n - 1',
+        '}',
+        '',
+        'ngomong("Sakitu ti abdi!") jasa atuh'
+      ].join('\n')
     };
 
-    // Load dari URL share
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedCode = urlParams.get('code');
-    if (sharedCode) {
-      try { editor.value = decodeURIComponent(atob(sharedCode)); } catch {}
-    }
+    // Load kode dari URL share
+    try {
+      var qCode = new URLSearchParams(location.search).get('code');
+      if (qCode) editor.value = decodeURIComponent(atob(qCode));
+    } catch(e) {}
 
-    // Toast
-    function showToast(msg: string, isError = false) {
+    // ---- Toast ----
+    function showToast(msg, isError) {
       if (!toast) return;
       toast.textContent = msg;
       toast.className = 'toast show' + (isError ? ' error' : '');
-      setTimeout(() => { toast.className = 'toast'; }, 2500);
+      setTimeout(function() { toast.className = 'toast'; }, 2500);
     }
 
-    // Syntax highlight
-    const KW = ['wadah','manten','mun','munteu','keur','lakon','balik','bener','salah','bae','nyaho'];
-    const FN = ['ngomong','beja','tanya','nanya'];
+    // ---- Syntax highlighting ----
+    var KW = ['wadah','manten','mun','munteu','keur','lakon','balik','bener','salah','bae','nyaho'];
+    var FN = ['ngomong','beja','tanya','nanya'];
 
-    function highlight(code: string): string {
-      let h = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      h = h.replace(/"[^"\n]*"|'[^'\n]*'/g, s => `<span class="hl-str">${s}</span>`);
+    function highlight(code) {
+      var h = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      h = h.replace(/"[^"\n]*"|'[^'\n]*'/g, function(s) { return '<span class="hl-str">'+s+'</span>'; });
       h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-num">$1</span>');
-      h = h.replace(/\b(jasa)\b/g, '<span class="hl-jasa">$1</span>');
-      h = h.replace(/\b(atuh)\b/g, '<span class="hl-atuh">$1</span>');
-      FN.forEach(k => { h = h.replace(new RegExp(`\\b(${k})\\b`, 'g'), '<span class="hl-fn">$1</span>'); });
-      KW.forEach(k => { h = h.replace(new RegExp(`\\b(${k})\\b`, 'g'), '<span class="hl-kw">$1</span>'); });
+      h = h.replace(/\b(jasa)\b/g,  '<span class="hl-jasa">$1</span>');
+      h = h.replace(/\b(atuh)\b/g,  '<span class="hl-atuh">$1</span>');
+      FN.forEach(function(k) { h = h.replace(new RegExp('\\b('+k+')\\b','g'), '<span class="hl-fn">$1</span>'); });
+      KW.forEach(function(k) { h = h.replace(new RegExp('\\b('+k+')\\b','g'), '<span class="hl-kw">$1</span>'); });
       h = h.replace(/(#[^\n]*)/g, '<span class="hl-comment">$1</span>');
       return h;
     }
 
-    function renderHighlight() {
-      if (!highlightLayer) return;
-      highlightLayer.scrollTop = editor.scrollTop;
-      highlightLayer.scrollLeft = editor.scrollLeft;
-      highlightLayer.innerHTML = highlight(editor.value) + '\n';
+    function renderHL() {
+      if (!hlLayer) return;
+      hlLayer.scrollTop = editor.scrollTop;
+      hlLayer.scrollLeft = editor.scrollLeft;
+      hlLayer.innerHTML = highlight(editor.value) + '\n';
     }
 
-    function renderLineNumbers() {
+    function renderLN() {
       if (!lineNumbers) return;
-      const count = editor.value.split('\n').length;
-      lineNumbers.innerHTML = Array.from({length: count}, (_, i) => `<span>${i+1}</span>`).join('');
+      var n = editor.value.split('\n').length;
+      lineNumbers.innerHTML = Array.from({length:n}, function(_,i){ return '<span>'+(i+1)+'</span>'; }).join('');
       lineNumbers.scrollTop = editor.scrollTop;
     }
 
-    editor.addEventListener('input', () => { renderHighlight(); renderLineNumbers(); });
-    editor.addEventListener('scroll', () => {
-      if (highlightLayer) highlightLayer.scrollTop = editor.scrollTop;
-      if (lineNumbers) lineNumbers.scrollTop = editor.scrollTop;
+    editor.addEventListener('input', function() { renderHL(); renderLN(); });
+    editor.addEventListener('scroll', function() {
+      if (hlLayer)      hlLayer.scrollTop      = editor.scrollTop;
+      if (lineNumbers)  lineNumbers.scrollTop  = editor.scrollTop;
     });
+    renderHL(); renderLN();
 
-    renderHighlight();
-    renderLineNumbers();
-
-    // Template switch
-    templateSelect?.addEventListener('change', e => {
-      const val = (e.target as HTMLSelectElement).value;
-      if (templates[val]) {
-        editor.value = templates[val];
-        renderHighlight();
-        renderLineNumbers();
-      }
-    });
-
-    // Run code
-    const runCode = () => {
-      output.innerHTML = '';
-      const t0 = performance.now();
-
-      const interp = new Interpreter((msg: string) => {
-        const div = document.createElement('div');
-        div.className = 'output-line';
-        const prompt = document.createElement('span');
-        prompt.className = 'out-prompt';
-        prompt.textContent = '\u276f ';
-        div.appendChild(prompt);
-        div.appendChild(document.createTextNode(String(msg)));
-        output.appendChild(div);
-        output.scrollTop = output.scrollHeight;
+    // ---- Template switch ----
+    if (templateSel) {
+      templateSel.addEventListener('change', function(e) {
+        var v = e.target.value;
+        if (TPL[v]) { editor.value = TPL[v]; renderHL(); renderLN(); }
       });
+    }
 
-      interp.execute(editor.value);
-
-      const footer = document.createElement('div');
+    // ---- Run ----
+    function runCode() {
+      output.innerHTML = '';
+      var t0 = performance.now();
+      try {
+        var interp = new Interpreter(function(msg) {
+          var div = document.createElement('div');
+          div.className = 'output-line';
+          var prompt = document.createElement('span');
+          prompt.className = 'out-prompt';
+          prompt.textContent = '\u276f ';
+          div.appendChild(prompt);
+          div.appendChild(document.createTextNode(String(msg)));
+          output.appendChild(div);
+          output.scrollTop = output.scrollHeight;
+        });
+        interp.execute(editor.value);
+      } catch(err) {
+        var errDiv = document.createElement('div');
+        errDiv.className = 'output-line';
+        errDiv.style.color = '#f87171';
+        errDiv.textContent = 'Kagok! ' + err.message;
+        output.appendChild(errDiv);
+      }
+      var footer = document.createElement('div');
       footer.className = 'output-footer';
-      footer.textContent = `Selesai dalam ${(performance.now() - t0).toFixed(1)}ms`;
+      footer.textContent = 'Selesai dalam ' + (performance.now()-t0).toFixed(1) + 'ms';
       output.appendChild(footer);
-    };
+    }
 
     runBtn.addEventListener('click', runCode);
 
-    editor.addEventListener('keydown', e => {
+    editor.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); return; }
       if (e.key === 'Tab') {
         e.preventDefault();
-        const s = editor.selectionStart, en = editor.selectionEnd;
+        var s = editor.selectionStart, en = editor.selectionEnd;
         editor.value = editor.value.substring(0,s) + '  ' + editor.value.substring(en);
         editor.selectionStart = editor.selectionEnd = s + 2;
-        renderHighlight(); renderLineNumbers();
+        renderHL(); renderLN();
       }
     });
 
-    copyBtn?.addEventListener('click', () => {
-      navigator.clipboard.writeText(editor.value)
-        .then(() => showToast('Kode berhasil disalin!'))
-        .catch(() => showToast('Gagal nyalin kode', true));
-    });
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(editor.value)
+          .then(function() { showToast('Kode berhasil disalin!'); })
+          .catch(function() { showToast('Gagal nyalin', true); });
+      });
+    }
 
-    shareBtn?.addEventListener('click', () => {
-      try {
-        const encoded = btoa(encodeURIComponent(editor.value));
-        const url = `${location.origin}${location.pathname}?code=${encoded}`;
-        navigator.clipboard.writeText(url).then(() => showToast('Link disalin! Bagiin ke babaturan!'));
-      } catch { showToast('Gagal bikin link', true); }
-    });
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function() {
+        try {
+          var enc = btoa(encodeURIComponent(editor.value));
+          navigator.clipboard.writeText(location.origin + location.pathname + '?code=' + enc)
+            .then(function() { showToast('Link disalin! Bagiin ke babaturan!'); });
+        } catch(e) { showToast('Gagal bikin link', true); }
+      });
+    }
 
-    clearBtn?.addEventListener('click', () => {
-      output.innerHTML = '<div class="output-welcome"><i class="ph-fill ph-terminal-window"></i><p>Output dibersihkan.</p></div>';
-    });
-  });
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function() {
+        output.innerHTML = '<div class="output-welcome"><i class="ph-fill ph-terminal-window"></i><p>Output dibersihkan.</p></div>';
+      });
+    }
+  })();
 </script>
 
 <style>
@@ -271,132 +288,60 @@ ngomong("Sakitu ti abdi!") jasa atuh`
     background: var(--bg-surface);
     border-bottom: 1px solid var(--border);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    font-weight: 500;
-    flex-shrink: 0;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 10px 8px;
   }
-  .header-left, .header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
   .file-dots { display: flex; gap: 5px; }
   .fdot { width: 11px; height: 11px; border-radius: 50%; }
   .fdot.red    { background: #ff5f57; }
   .fdot.yellow { background: #febc2e; }
   .fdot.green  { background: #28c840; }
-  .file-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-  }
+  .file-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); }
   .template-dropdown {
-    background: var(--bg-card);
-    color: var(--text-soft);
-    border: 1px solid var(--border);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 0.78rem;
-    font-family: inherit;
-    outline: none;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: var(--bg-card); color: var(--text-soft); border: 1px solid var(--border);
+    padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-family: inherit;
+    outline: none; cursor: pointer; transition: all 0.2s;
+    max-width: 140px;
   }
-  .template-dropdown:hover { border-color: var(--teal); color: var(--text); }
-  .template-dropdown option { background: var(--bg); color: var(--text); }
+  .template-dropdown:hover { border-color: var(--teal); color: var(--text); background: var(--accent-dim); }
+  .template-dropdown option { background: var(--bg-surface); color: var(--text); }
   .icon-btn {
-    background: var(--accent-dim);
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    cursor: pointer;
+    background: var(--accent-dim); color: var(--text-muted); border: 1px solid var(--border);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-    transition: all 0.2s;
+    font-size: 1rem; transition: all 0.2s;
   }
-  .icon-btn:hover {
-    background: var(--accent);
-    color: white;
-    border-color: transparent;
-    transform: scale(1.08);
-  }
+  .icon-btn:hover { background: var(--accent); color: white; border-color: transparent; transform: scale(1.08); }
   .run-button {
     display: flex; align-items: center; gap: 6px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    padding: 7px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.88rem;
-    font-family: inherit;
-    transition: all 0.2s;
+    background: var(--accent); color: white; border: none;
+    padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    font-weight: 600; font-size: 0.88rem; font-family: inherit; transition: all 0.2s;
   }
-  .run-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 14px var(--accent-dim);
-  }
+  .run-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px var(--accent-dim); }
   .run-button:active { transform: scale(0.97); }
 
-  /* Editor Layout */
-  .editor-body {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
+  /* Editor body */
+  .editor-body { display: flex; flex: 1; overflow: hidden; }
   .line-numbers {
-    width: 44px;
-    flex-shrink: 0;
-    padding: 14px 0;
-    text-align: right;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.85rem;
-    line-height: 1.6;
-    color: var(--text-muted);
-    overflow: hidden;
-    user-select: none;
-    border-right: 1px solid var(--border);
-    background: var(--bg-surface);
-    opacity: 0.5;
+    width: 44px; flex-shrink: 0; padding: 14px 0; text-align: right;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6;
+    color: var(--text-muted); overflow: hidden; user-select: none;
+    border-right: 1px solid var(--border); background: var(--bg-surface); opacity: 0.5;
   }
   .line-numbers span { display: block; padding-right: 10px; }
   .editor-wrapper { position: relative; flex: 1; overflow: hidden; }
   .highlight-layer, #editor {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    margin: 0;
-    padding: 14px 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    tab-size: 2;
-    white-space: pre;
-    overflow: auto;
-    box-sizing: border-box;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0;
+    padding: 14px; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem; line-height: 1.6; tab-size: 2;
+    white-space: pre; overflow: auto; box-sizing: border-box;
   }
-  .highlight-layer {
-    color: transparent;
-    pointer-events: none;
-    z-index: 1;
-    overflow: hidden;
-  }
-  #editor {
-    background: transparent;
-    border: none;
-    color: var(--text-soft);
-    resize: none;
-    outline: none;
-    caret-color: var(--teal);
-    z-index: 2;
-  }
+  .highlight-layer { color: transparent; pointer-events: none; z-index: 1; overflow: hidden; }
+  #editor { background: transparent; border: none; color: var(--text-soft); resize: none; outline: none; caret-color: var(--teal); z-index: 2; }
 
-  /* Syntax Colors */
+  /* Syntax colors */
   :global(.hl-kw)      { color: var(--accent); font-weight: 700; }
   :global(.hl-fn)      { color: var(--teal); }
   :global(.hl-str)     { color: #86efac; }
@@ -407,79 +352,50 @@ ngomong("Sakitu ti abdi!") jasa atuh`
 
   /* Terminal */
   .output-content {
-    flex: 1;
-    padding: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem;
-    overflow-y: auto;
-    background: var(--bg-surface);
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex: 1; padding: 14px; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem; overflow-y: auto; background: var(--bg-surface);
+    display: flex; flex-direction: column; gap: 2px;
   }
   .output-welcome {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    gap: 8px;
-    color: var(--text-muted);
-    font-size: 0.88rem;
-    text-align: center;
-    opacity: 0.7;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 8px; color: var(--text-muted); font-size: 0.88rem; text-align: center; opacity: 0.7;
   }
   .output-welcome i { font-size: 2rem; opacity: 0.3; }
   .output-welcome p { margin: 0; }
   .output-hint { font-size: 0.8rem; }
-  .output-welcome kbd {
-    background: var(--bg-card);
-    border: 1px solid var(--border-mid);
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-size: 0.78rem;
-  }
+  .output-welcome kbd { background: var(--bg-card); border: 1px solid var(--border-mid); padding: 2px 7px; border-radius: 4px; font-size: 0.78rem; }
   .output-line { line-height: 1.6; color: var(--text); padding: 1px 0; }
   .out-prompt { color: var(--teal); font-weight: 700; }
-  .output-footer {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 0.78rem;
-  }
+  .output-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.78rem; }
 
   /* Toast */
   .toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
+    position: fixed; bottom: 100px; left: 50%;
     transform: translateX(-50%) translateY(16px);
-    background: var(--bg-surface);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-mid);
-    color: var(--text);
-    padding: 11px 22px;
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    z-index: 9999;
-    white-space: nowrap;
-    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-surface); backdrop-filter: blur(12px);
+    border: 1px solid var(--border-mid); color: var(--text);
+    padding: 11px 22px; border-radius: 12px; font-size: 0.9rem; font-weight: 500;
+    opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 9999;
+    white-space: nowrap; font-family: 'JetBrains Mono', monospace;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { border-color: rgba(239, 68, 68, 0.5); color: #f87171; }
+  .toast.error { border-color: rgba(239,68,68,0.5); color: #f87171; }
 
-  @media (max-width: 900px) {
-    .playground-container {
-      grid-template-columns: 1fr;
-      height: auto;
-    }
-    .editor-card { height: 420px; }
-    .terminal-card { height: 320px; }
-    .template-dropdown { display: none; }
+  @media (max-width: 768px) {
+    .playground-container { grid-template-columns: 1fr; height: auto; gap: 15px; }
+    .editor-card { height: 450px; }
+    .terminal-card { height: 350px; }
+    .card-header { padding: 12px; }
+    .header-left { flex: 1; min-width: 150px; }
+    .header-right { flex: 0; }
+    .template-dropdown { max-width: 110px; font-size: 0.75rem; }
+    .run-button { padding: 8px 12px; font-size: 0.8rem; }
+    .run-button span { display: none; } /* Hide text, keep icon and shorthand if needed */
+    .run-button::after { content: 'Jalanin!'; } /* Shorter text for mobile */
+  }
+  @media (max-width: 480px) {
+    .header-left { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .header-right { width: 100%; justify-content: flex-end; }
+    .file-name { order: -1; font-size: 0.75rem; }
   }
 </style>
