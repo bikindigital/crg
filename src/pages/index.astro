@@ -160,8 +160,7 @@ import Navbar from '../components/Navbar.astro';
 
 		<footer>
 			<div class="footer-brand">
-				<i class="ph-fill ph-brackets-curly"></i>
-				<span>CRG</span>
+				<span class="brand-text">CRG</span>
 			</div>
 			<p>Curug Language — Dipersembahkan ku Barudak Curug, Tangerang.</p>
 			<span class="muted">Gampang kaharti, enteng dipake.</span>
@@ -483,6 +482,16 @@ import Navbar from '../components/Navbar.astro';
 		margin-bottom: 12px;
 	}
 	footer p { color: var(--text-soft); font-size: 0.9rem; margin: 0 0 6px; }
+	.brand-text {
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 800;
+		font-size: 1.4rem;
+		letter-spacing: -0.04em;
+		background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		filter: drop-shadow(0 0 12px var(--accent-dim));
+	}
 	.muted { font-size: 0.82rem; color: var(--text-muted); }
 
 	/* ===== RESPONSIVE ===== */

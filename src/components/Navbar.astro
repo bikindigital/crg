@@ -4,8 +4,7 @@
 <!-- Desktop Pill Nav -->
 <nav class="desktop-nav glass neon-shadow" id="desktop-nav">
   <a href="#top" class="nav-brand">
-    <img src="/logo.png" alt="CRG Logo" class="nav-logo" />
-    <span>CRG</span>
+    <span class="brand-text">CRG</span>
   </a>
   <div class="nav-links">
     <a href="#top" class="nav-item" data-nav="top">Beranda</a>
@@ -26,8 +25,7 @@
 <!-- Mobile Header (top bar) -->
 <header class="mobile-header glass" id="mobile-header">
   <a href="#top" class="nav-brand">
-    <i class="ph-fill ph-brackets-curly"></i>
-    <span>CRG</span>
+    <span class="brand-text">CRG</span>
   </a>
   <div class="mobile-header-actions">
     <button id="theme-toggle-mob" class="theme-btn" aria-label="Toggle theme">
@@ -86,17 +84,17 @@
     text-decoration: none;
     letter-spacing: -0.01em;
   }
-  .nav-logo {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-    filter: drop-shadow(0 0 8px var(--accent-glow));
-  }
-  .nav-brand span {
+  .brand-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.04em;
     background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px var(--accent-dim));
   }
+
   .nav-links {
     display: flex;
     gap: 4px;
