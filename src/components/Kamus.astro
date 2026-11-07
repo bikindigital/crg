@@ -1,167 +1,254 @@
 ---
-const categories = [
-  {
-    name: 'Variabel & Data',
-    keywords: [
-      { s: 'wadah', e: 'let / var', d: 'Wadah nyimpen data (Variable).' },
-      { s: 'manten', e: 'const', d: 'Data nu tetep, geus aya (Constant).' },
-      { s: 'barudak', e: 'Array', d: 'Kumpulan data / barisan (List).' },
-      { s: 'bae', e: 'null', d: 'Eweuh nanaon, biarin bae (Null).' },
-      { s: 'acan', e: 'undefined', d: 'Teuing acan aya (Undefined).' },
-      { s: 'konci', e: 'key', d: 'Konci data (Object key).' },
-    ]
-  },
-  {
-    name: 'Kaluaran & Input',
-    keywords: [
-      { s: 'beja / ngomong', e: 'print', d: 'Ngabejaan / Nyetak hasil (Output).' },
-      { s: 'tanya / nanya', e: 'input', d: 'Nanya ka user (Prompt).' },
-    ]
-  },
-  {
-    name: 'Logika & Kondisi',
-    keywords: [
-      { s: 'mun', e: 'if', d: 'Lamun kieu (Condition).' },
-      { s: 'munteu', e: 'else', d: 'Mun henteu kieu (Else).' },
-      { s: 'sabab', e: 'switch', d: 'Sabab pilihanna loba (Switch).' },
-      { s: 'kasus', e: 'case', d: 'Pilihan kasusna (Case).' },
-      { s: 'baku', e: 'default', d: 'Pilihan baku (Default).' },
-      { s: 'nyaho', e: 'bool', d: 'Nyaho bener/salah (Boolean).' },
-      { s: 'teu', e: '!', d: 'Henteu / Lain (Not Operator).' },
-    ]
-  },
-  {
-    name: 'Perulangan & Fungsi',
-    keywords: [
-      { s: 'keur', e: 'for / while', d: 'Keur sakitu balikan (Loop).' },
-      { s: 'deui', e: 'repeat', d: 'Ulang deui (Do while).' },
-      { s: 'lakon', e: 'function', d: 'Jalanin lakonna (Main logic).' },
-      { s: 'balik', e: 'return', d: 'Hasilna balik deui (Return).' },
-      { s: 'geura', e: 'exec', d: 'Gaskeun geura! (Run main).' },
-      { s: 'enggeus', e: 'break', d: 'Enggeus sakitu bae (Break).' },
-      { s: 'tuluy', e: 'continue', d: 'Tuluykeun bae (Continue).' },
-    ]
-  },
-  {
-    name: 'Modern (Async / Class)',
-    keywords: [
-      { s: 'isuk', e: 'async', d: 'Engke isuk pageto (Asynchronous).' },
-      { s: 'janji', e: 'promise', d: 'Janji heula nya (Promise).' },
-      { s: 'saka', e: 'await', d: 'Saka sakeudeung (Await).' },
-      { s: 'imah', e: 'class', d: 'Struktur imahna (Class/Module).' },
-      { s: 'kolot', e: 'super', d: 'Indung bapakna (Parent class).' },
-      { s: 'jauh', e: 'fetch', d: 'Ngala ti jauh (Remote API).' },
-    ]
-  },
-  {
-    name: 'Particle & Error',
-    keywords: [
-      { s: 'jasa', e: '!! / *100', d: 'Banget / Suffix penting (Emphasis).' },
-      { s: 'atuh', e: ';', d: 'Pemanis kalimat (Statement ender).' },
-      { s: 'kagok', e: 'error', d: 'Kagok macet (Exception).' },
-      { s: 'cobaan', e: 'try', d: 'Cobaan heula (Try block).' },
-      { s: 'sanya', e: 'catch', d: 'Sanya lamun gagal (Catch block).' },
-    ]
-  }
-];
+import Icon from './Icon.astro';
+import { categories, totalAktif, totalRencana } from '../data/kamus.js';
 ---
-<div class="kamus-section glass neon-shadow">
-  <div class="kamus-header">
-    <i class="ph-fill ph-book-bookmark kamus-icon"></i>
-    <h2>Kamus CRG Lengkap</h2>
+
+<div class="tools">
+  <div class="search">
+    <Icon name="search" size={18} />
+    <label for="kamus-q" class="visually-hidden">Teangan kecap konci</label>
+    <input id="kamus-q" type="search" placeholder="Teangan: wadah, loop, if, class…" autocomplete="off" />
   </div>
-  
-  <div class="kamus-grid">
-    {categories.map(cat => (
-      <div class="category-block">
-        <h3>{cat.name}</h3>
-        <div class="keyword-list">
-          {cat.keywords.map(k => (
-            <div class="keyword-item">
-              <div class="keyword-header">
-                <code class="sucutang">{k.s}</code>
-                <code class="logic">{k.e}</code>
-              </div>
-              <p class="desc">{k.d}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    ))}
+  <div class="legend">
+    <span class="pill on">Aktif · {totalAktif}</span>
+    <span class="pill plan">Rencana · {totalRencana}</span>
   </div>
 </div>
+<p class="empty" id="kamus-empty" hidden>Teu kapanggih. Coba kecap sejen, atawa padananana (conto: "if", "loop").</p>
+
+<div class="grid" id="kamus-grid">
+  {
+    categories.map((cat) => (
+      <section class="cat" aria-label={cat.name} data-cat>
+        <h3>{cat.name}</h3>
+        <ul role="list">
+          {cat.keywords.map((k) => (
+            <li
+              class:list={['kw', { planned: !k.aktif }]}
+              data-search={`${k.s} ${k.e} ${k.d}`.toLowerCase()}
+            >
+              <div class="kw-top">
+                <code class="crg">{k.s}</code>
+                <span class="eq">{k.e}</span>
+                <span class:list={['status', k.aktif ? 'on' : 'plan']}>{k.aktif ? 'Aktif' : 'Rencana'}</span>
+              </div>
+              <p>{k.d}</p>
+              {k.c && (
+                <div class="example">
+                  <div class="ex-bar">
+                    <span>Conto</span>
+                    <button type="button" class="try" data-code={k.c} aria-label={`Coba conto ${k.s} di Playground`}>
+                      <Icon name="play" size={13} />
+                      Coba
+                    </button>
+                  </div>
+                  <pre>{k.c}</pre>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</div>
+
+<script>
+  // "Coba": kirim conto ka Playground
+  document.querySelectorAll<HTMLButtonElement>('.try[data-code]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('crg:coba', { detail: btn.dataset.code }));
+    });
+  });
+
+  // Teangan
+  const q = document.getElementById('kamus-q') as HTMLInputElement | null;
+  const empty = document.getElementById('kamus-empty');
+  const cats = [...document.querySelectorAll<HTMLElement>('[data-cat]')];
+  q?.addEventListener('input', () => {
+    const term = q.value.trim().toLowerCase();
+    let shown = 0;
+    for (const cat of cats) {
+      let catShown = 0;
+      cat.querySelectorAll<HTMLElement>('[data-search]').forEach((li) => {
+        const hit = !term || (li.dataset.search ?? '').includes(term);
+        li.hidden = !hit;
+        if (hit) catShown++;
+      });
+      cat.hidden = catShown === 0;
+      shown += catShown;
+    }
+    if (empty) empty.hidden = shown > 0;
+  });
+</script>
 
 <style>
-  .kamus-section {
-    padding: 32px;
+  .tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 16px;
+    margin-bottom: 24px;
   }
-  .kamus-header {
+  .search {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 32px;
-    justify-content: center;
+    gap: 10px;
+    flex: 1 1 320px;
+    max-width: 440px;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 9999px;
+    background: var(--surface);
+    box-shadow: inset 0 0 0 1px var(--line-2);
+    color: var(--muted);
+    transition: box-shadow 0.18s ease;
   }
-  .kamus-icon {
-    font-size: 2rem;
-    color: var(--teal);
+  .search:focus-within { box-shadow: inset 0 0 0 1.5px var(--brand); }
+  .search input {
+    flex: 1;
+    min-width: 0;
+    min-height: 46px;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
   }
-  h2 {
-    margin: 0;
-    color: var(--teal);
-    font-size: 1.8rem;
+  .search input::placeholder { color: var(--muted); }
+  .legend { display: flex; gap: 8px; }
+  .pill,
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .pill::before,
+  .status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .on { color: var(--link); background: var(--brand-soft); }
+  .plan { color: var(--muted); background: var(--sunken); box-shadow: inset 0 0 0 1px var(--line); }
+  .empty { margin-bottom: 24px; color: var(--muted); }
+
+  .grid {
+    columns: 3 340px;
+    column-gap: 16px;
+  }
+  .cat {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .cat[hidden], .kw[hidden] { display: none; }
+  h3 {
+    margin-bottom: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--text);
+    font-size: 1.05rem;
+    font-weight: 650;
     letter-spacing: -0.02em;
   }
-  .kamus-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 32px;
-  }
-  .category-block h3 {
-    color: var(--accent);
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-  .keyword-list {
+  ul {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 2px;
+    padding: 0;
+    list-style: none;
   }
-  .keyword-item {
-    background: rgba(255, 255, 255, 0.03);
-    padding: 12px;
-    border-radius: 8px;
-    transition: all 0.2s;
+  .kw {
+    padding: 12px 10px;
+    border-radius: var(--radius-sm);
   }
-  .keyword-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    transform: translateX(4px);
-  }
-  .keyword-header {
+  .kw + .kw { border-top: 1px dashed var(--line); border-radius: 0; }
+  .kw-top {
     display: flex;
-    justify-content: space-between;
+    flex-wrap: wrap;
     align-items: center;
-    margin-bottom: 4px;
+    gap: 6px 10px;
   }
-  .sucutang {
-    color: var(--teal);
-    font-weight: 700;
-    font-size: 0.92rem;
+  .crg { font-size: 0.95rem; font-weight: 600; padding: 2px 8px; }
+  .planned .crg { color: var(--text-2); background: var(--sunken); }
+  .eq {
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
   }
-  .logic {
-    color: var(--text-muted);
-    font-size: 0.78rem;
-    background: var(--bg-surface);
-    padding: 2px 6px;
-    border-radius: 4px;
+  .status { margin-left: auto; padding: 2px 10px; font-size: 11px; }
+  .kw p {
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.5;
   }
-  .desc {
-    color: var(--text-soft);
-    font-size: 0.84rem;
+  .example {
+    margin-top: 10px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--code-bg);
+  }
+  .ex-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 6px 6px 14px;
+    background: var(--code-bar);
+    border-bottom: 1px solid var(--code-line);
+    color: var(--code-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .example pre {
     margin: 0;
+    padding: 12px 14px;
+    overflow-x: auto;
+    color: var(--code-text);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+  .try {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 9999px;
+    background: var(--gold);
+    color: var(--on-gold);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+    font-family: var(--font-sans);
+    transition: filter 0.18s ease;
+  }
+  .try:hover { filter: brightness(1.05); }
+  .try::after {
+    /* area sentuh minimal 44px tanpa ngagedekeun tombol */
+    content: '';
+    position: absolute;
+    inset: -6px;
   }
 </style>

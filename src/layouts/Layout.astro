@@ -4,147 +4,289 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const description =
+	'CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang — gampang kaharti jeung enteng dipake.';
+const site = (Astro.site?.href ?? 'https://crg.web.id/').replace(/\/$/, '');
+const ogImage = `${site}/thumbnail.png`;
 ---
 
 <!doctype html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-		
-		<!-- Primary Meta Tags -->
-		<meta name="title" content={title} />
-		<meta name="description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
+		<meta name="description" content={description} />
+		<meta name="author" content="BikinDigital" />
+		<meta name="copyright" content={`© ${new Date().getFullYear()} BikinDigital`} />
+		<link rel="author" href="https://bikindigital.id" />
 
-		<!-- Open Graph / Facebook -->
+		<!-- Open Graph / Twitter -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://crg.id" />
+		<meta property="og:url" content={site} />
+		<meta property="og:site_name" content="CRG — Curug Language" />
+		<meta property="og:locale" content="id_ID" />
 		<meta property="og:title" content={title} />
-		<meta property="og:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
-		<meta property="og:image" content="/thumbnail.png" />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:image:alt" content="CRG — Basa coding Curug Language, conto kode wadah jeung ngomong" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+		<meta name="theme-color" content="#f7f8f5" />
+		<link rel="canonical" href={site} />
 
-		<!-- Twitter -->
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content="https://crg.id" />
-		<meta property="twitter:title" content={title} />
-		<meta property="twitter:description" content="CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang—gampang kaharti jeung enteng dipake." />
-		<meta property="twitter:image" content="/thumbnail.png" />
-
-		<link rel="icon" type="image/png" href="/logo.png" />
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-		<script src="https://unpkg.com/@phosphor-icons/web"></script>
-		<!-- Theme: apply before paint to avoid flash -->
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="icon" href="/favicon.ico" sizes="48x48" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+		<!-- Tema dipasang sebelum render supaya tidak berkedip -->
 		<script is:inline>
-			(function() {
-				const saved = localStorage.getItem('crg-theme');
-				const preferred = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-				document.documentElement.setAttribute('data-theme', saved || preferred);
+			(function () {
+				var saved = null;
+				try { saved = localStorage.getItem('crg-theme'); } catch (e) {}
+				var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+				var theme = saved || (dark ? 'dark' : 'light');
+				document.documentElement.setAttribute('data-theme', theme);
+				document.querySelector('meta[name="theme-color"]').setAttribute('content', theme === 'dark' ? '#0b1513' : '#f7f8f5');
 			})();
 		</script>
 	</head>
 	<body>
+		<a class="skip-link" href="#playground">Langsung ka Playground</a>
 		<slot />
 	</body>
 </html>
 
 <style is:global>
-	/* ===== DESIGN TOKENS: Dark Mode (default) ===== */
-	:root,
-	[data-theme="dark"] {
-		--bg:          #08080b;
-		--bg-surface:  rgba(16, 16, 22, 0.85);
-		--bg-card:     rgba(20, 20, 28, 0.75);
-		--border:      rgba(255, 255, 255, 0.08);
-		--border-mid:  rgba(255, 255, 255, 0.14);
-		--accent:      #a855f7;
-		--accent-dim:  rgba(168, 85, 247, 0.15);
-		--teal:        #2dd4bf;
-		--teal-dim:    rgba(45, 212, 191, 0.12);
-		--text:        #f1f5f9;
-		--text-muted:  #64748b;
-		--text-soft:   #94a3b8;
-		--shadow:      0 0 28px rgba(168, 85, 247, 0.18);
-		--body-bg-1:   rgba(168, 85, 247, 0.12);
-		--body-bg-2:   rgba(45, 212, 191, 0.07);
+	/*
+	 * Token mengikuti bikindigital.id: terang & hangat sebagai default, mode gelap = teal malam.
+	 * teal = identitas + aksi penting; gold = sorotan kecil, dipakai hemat.
+	 */
+	:root {
+		color-scheme: light;
+		--brand: #087f73;
+		--brand-deep: #075e56;
+		--brand-ink: #04403a;
+		--brand-rgb: 8 127 115;
+		--gold: #ffc52e;
+		--gold-rgb: 255 197 46;
+		--on-gold: #172b27;
 
-		/* Legacy compatibility */
-		--accent-neon: var(--accent);
-		--accent-teal: var(--teal);
-		--text-main:   var(--text);
-		--bg-dark:     var(--bg);
+		--canvas: #f7f8f5;
+		--surface: #ffffff;
+		--sunken: #eef1ec;
+		--line: #e3e8e2;
+		--line-2: #d3dad2;
+		--text: #172b27;
+		--text-2: #33443f;
+		--muted: #65716a;
+		--link: #087f73;
+		--brand-soft: rgb(var(--brand-rgb) / 0.08);
+
+		/* Panel kode: selalu gelap (teal malam) di dua mode */
+		--code-bg: #0b1513;
+		--code-bar: #111e1b;
+		--code-line: #22332f;
+		--code-text: #d9e4df;
+		--code-muted: #7f938c;
+
+		--font-sans: 'Geist', system-ui, sans-serif;
+		--font-mono: 'Geist Mono', ui-monospace, monospace;
+
+		--shadow-sm: 0 1px 2px rgb(23 43 39 / 0.06);
+		--shadow-md: 0 1px 2px rgb(23 43 39 / 0.04), 0 12px 32px -12px rgb(23 43 39 / 0.16);
+		--shadow-lg: 0 2px 4px rgb(23 43 39 / 0.04), 0 32px 64px -24px rgb(23 43 39 / 0.28);
+
+		--radius-sm: 10px;
+		--radius-md: 16px;
+		--radius-lg: 24px;
+		--container: 1200px;
+		--gutter: 40px;
+		--ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 	}
 
-	/* ===== DESIGN TOKENS: Light Mode ===== */
-	[data-theme="light"] {
-		--bg:          #f4f6fb;
-		--bg-surface:  rgba(255, 255, 255, 0.9);
-		--bg-card:     rgba(255, 255, 255, 0.8);
-		--border:      rgba(0, 0, 0, 0.07);
-		--border-mid:  rgba(0, 0, 0, 0.12);
-		--accent:      #7c3aed;
-		--accent-dim:  rgba(124, 58, 237, 0.1);
-		--teal:        #0d9488;
-		--teal-dim:    rgba(13, 148, 136, 0.1);
-		--text:        #0f172a;
-		--text-muted:  #64748b;
-		--text-soft:   #475569;
-		--shadow:      0 4px 24px rgba(124, 58, 237, 0.12);
-		--body-bg-1:   rgba(124, 58, 237, 0.06);
-		--body-bg-2:   rgba(13, 148, 136, 0.05);
-
-		/* Legacy compatibility */
-		--accent-neon: var(--accent);
-		--accent-teal: var(--teal);
-		--text-main:   var(--text);
-		--bg-dark:     var(--bg);
+	:root[data-theme='dark'] {
+		color-scheme: dark;
+		--canvas: #0b1513;
+		--surface: #111e1b;
+		--sunken: #0e1a17;
+		--line: #22332f;
+		--line-2: #2f4540;
+		--text: #f1f5f2;
+		--text-2: #c9d4cf;
+		--muted: #8fa09a;
+		--link: #5fcbbb;
+		--brand-soft: rgb(95 203 187 / 0.1);
+		--code-bg: #07100e;
+		--code-bar: #0d1916;
+		--shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+		--shadow-md: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+		--shadow-lg: 0 32px 64px -24px rgb(0 0 0 / 0.7);
 	}
 
-	/* ===== BASE ===== */
+	@media (max-width: 900px) {
+		:root { --gutter: 24px; }
+	}
+	@media (max-width: 560px) {
+		:root { --gutter: 18px; }
+	}
+
 	*, *::before, *::after { box-sizing: border-box; }
+	* { margin: 0; }
 
 	html {
-		font-family: 'Space Grotesk', sans-serif;
-		background: var(--bg);
-		color: var(--text);
+		font-family: var(--font-sans);
+		background: var(--canvas);
+		color: var(--text-2);
 		scroll-behavior: smooth;
-		scroll-padding-top: 90px;
-		transition: background 0.3s, color 0.3s;
+		scroll-padding-top: 88px;
+		-webkit-text-size-adjust: 100%;
 	}
 
 	body {
-		margin: 0;
-		padding: 0;
 		min-height: 100vh;
-		background: 
-			radial-gradient(ellipse at 0% 0%, var(--body-bg-1) 0%, transparent 55%),
-			radial-gradient(ellipse at 100% 100%, var(--body-bg-2) 0%, transparent 55%),
-			var(--bg);
-		transition: background 0.3s;
+		background: var(--canvas);
+		font-size: 16px;
+		line-height: 1.6;
+		-webkit-font-smoothing: antialiased;
+		transition: background-color 0.2s ease-out, color 0.2s ease-out;
 	}
 
-	code {
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.88em;
-		padding: 2px 6px;
-		background: var(--accent-dim);
-		color: var(--accent);
+	h1, h2, h3 {
+		color: var(--text);
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+	}
+	p { text-wrap: pretty; }
+	a { color: inherit; text-decoration: none; }
+	button { font: inherit; color: inherit; background: none; border: 0; }
+	a[href], button:not(:disabled), [role='option'] { cursor: pointer; }
+	svg { display: block; flex: none; }
+	:is(ul, ol)[role='list'] { list-style: none; padding: 0; }
+
+	:focus-visible {
+		outline: 2px solid var(--link);
+		outline-offset: 3px;
 		border-radius: 4px;
 	}
+	::selection { background: var(--gold); color: var(--on-gold); }
 
-	/* ===== GLASS UTILITY ===== */
-	.glass {
-		background: var(--bg-card);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid var(--border);
-		border-radius: 16px;
+	code {
+		font-family: var(--font-mono);
+		font-size: 0.88em;
+		padding: 2px 6px;
+		border-radius: 6px;
+		color: var(--link);
+		background: var(--brand-soft);
 	}
 
-	.neon-shadow {
-		box-shadow: var(--shadow);
+	.container {
+		width: 100%;
+		max-width: calc(var(--container) + var(--gutter) * 2);
+		margin-inline: auto;
+		padding-inline: var(--gutter);
+	}
+
+	/* Label kecil di atas judul: mono kapital + titik emas */
+	.eyebrow {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		font-family: var(--font-mono);
+		font-size: 12.5px;
+		font-weight: 500;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+	.eyebrow::before {
+		content: '';
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--gold);
+		box-shadow: 0 0 0 3px rgb(var(--gold-rgb) / 0.25);
+	}
+
+	.btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+		min-height: 48px;
+		padding: 0 22px;
+		border-radius: 9999px;
+		font-size: 15.5px;
+		font-weight: 550;
+		letter-spacing: -0.01em;
+		white-space: nowrap;
+		transition: background-color 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.2s var(--ease);
+	}
+	.btn:active { transform: scale(0.98); }
+	.btn-primary {
+		background: var(--brand);
+		color: #ffffff;
+		box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14), 0 6px 16px -8px rgb(var(--brand-rgb) / 0.7);
+	}
+	.btn-primary:hover { background: var(--brand-deep); }
+	.btn-ghost {
+		background: var(--surface);
+		color: var(--text);
+		box-shadow: inset 0 0 0 1px var(--line-2);
+	}
+	.btn-ghost:hover { box-shadow: inset 0 0 0 1px var(--text); }
+
+	.skip-link {
+		position: absolute;
+		left: 16px;
+		top: -100px;
+		z-index: 2000;
+		padding: 10px 16px;
+		border-radius: var(--radius-sm);
+		background: var(--brand);
+		color: #fff;
+		font-weight: 550;
+	}
+	.skip-link:focus { top: 12px; }
+
+	.visually-hidden {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	/* Warna sintaks (panel kode gelap) */
+	.hl-kw, .c-kw { color: var(--gold); font-weight: 600; }
+	.hl-fn, .c-fn { color: #5fcbbb; }
+	.hl-str, .c-str { color: #b8e6a6; }
+	.hl-num, .c-num { color: #ffb37a; }
+	.hl-jasa, .c-jasa { color: #ff8f6b; font-weight: 600; }
+	.hl-atuh, .c-atuh { color: var(--code-muted); }
+	.hl-comment, .c-comment { color: var(--code-muted); font-style: italic; }
+
+	@media (prefers-reduced-motion: reduce) {
+		*, *::before, *::after {
+			scroll-behavior: auto !important;
+			transition-duration: 0.01ms !important;
+			animation-duration: 0.01ms !important;
+		}
 	}
 </style>

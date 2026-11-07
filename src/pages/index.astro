@@ -3,514 +3,410 @@ import Layout from '../layouts/Layout.astro';
 import Playground from '../components/Playground.astro';
 import Kamus from '../components/Kamus.astro';
 import Navbar from '../components/Navbar.astro';
+import Icon from '../components/Icon.astro';
+import LogoMark from '../components/LogoMark.astro';
+import { totalAktif } from '../data/kamus';
+
+const year = new Date().getFullYear();
 ---
 
 <Layout title="CRG — Curug Language">
-  <Navbar />
+	<Navbar />
 	<main id="top">
-
-		<!-- Hero Section -->
-		<section class="hero">
-			<div class="hero-left">
-				<div class="badge">
-					<span class="badge-dot"></span>
-					Beta Release v1.0.0
-				</div>
-				<h1>Basa Coding<br><span class="gradient-text">Curug Language</span></h1>
-				<p class="subtitle">
-					<strong>CRG (Curug Language)</strong> nyaeta basa coding gaya santai khas Sunda Tangerang — gampang kaharti jeung enteng dipake.
+		<!-- Hero -->
+		<section class="hero container" aria-labelledby="hero-title">
+			<div class="hero-copy">
+				<p class="eyebrow">Beta · v1.0.0</p>
+				<h1 id="hero-title">Basa coding<br /><span class="accent">Curug Language.</span></h1>
+				<p class="lead">
+					<strong>CRG</strong> nyaeta basa coding gaya santai khas Sunda Tangerang — gampang kaharti jeung enteng
+					dipake. Tulis kode ku kecap sapopoe, jalankeun langsung di browser.
 				</p>
-				
-				<div class="hero-actions">
+
+				<div class="actions">
 					<a href="#playground" class="btn btn-primary">
-						<i class="ph-fill ph-terminal-window"></i>
+						<Icon name="terminal" />
 						Coba Ayeuna
 					</a>
-					<a href="#kamus" class="btn btn-secondary">
-						<i class="ph-fill ph-book-open"></i>
+					<a href="#kamus" class="btn btn-ghost">
+						<Icon name="book" />
 						Buka Kamus
 					</a>
 				</div>
 
-				<div class="hero-stats">
-					<div class="stat">
-						<span class="stat-num">50+</span>
-						<span class="stat-label">Keyword Lokal</span>
+				<dl class="facts">
+					<div>
+						<dt>Kecap konci aktif</dt>
+						<dd>{totalAktif}</dd>
 					</div>
-					<div class="stat-divider"></div>
-					<div class="stat">
-						<span class="stat-num">AST</span>
-						<span class="stat-label">Parser Engine</span>
+					<div>
+						<dt>Parser</dt>
+						<dd>Pratt · AST</dd>
 					</div>
-					<div class="stat-divider"></div>
-					<div class="stat">
-						<span class="stat-num">MIT</span>
-						<span class="stat-label">Open Source</span>
+					<div>
+						<dt>Install</dt>
+						<dd>Teu perlu</dd>
 					</div>
-				</div>
+				</dl>
 			</div>
 
-			<div class="hero-right">
-				<div class="code-window glass neon-shadow">
-					<div class="window-bar">
-						<div class="dots">
-							<span class="dot red"></span>
-							<span class="dot yellow"></span>
-							<span class="dot green"></span>
-						</div>
-						<span class="window-title">halo_curug.crg</span>
-						<span class="window-lang">CRG</span>
-					</div>
-					<pre class="hero-code"><span class="c-comment"># Halo Barudak Curug!</span>
+			<figure class="code-window" aria-label="Conto kode CRG jeung hasilna">
+				<div class="window-bar">
+					<span class="file"><Icon name="code" size={15} /> halo_curug.crg</span>
+					<span class="lang">CRG</span>
+				</div>
+				<pre class="hero-code"><span class="c-comment"># Halo Barudak Curug!</span>
 <span class="c-kw">wadah</span> ngaran = <span class="c-str">"Asep"</span>
 <span class="c-kw">wadah</span> umur = <span class="c-num">17</span>
 
-<span class="c-fn">ngomong</span>(<span class="c-str">"Sampurasun,"</span> + ngaran)
+<span class="c-fn">ngomong</span>(<span class="c-str">"Sampurasun, "</span> + ngaran)
 
 <span class="c-kw">mun</span> umur &gt; <span class="c-num">17</span> &lbrace;
   <span class="c-fn">ngomong</span>(<span class="c-str">"Geus kolot!"</span>) <span class="c-jasa">jasa</span>
 &rbrace; <span class="c-kw">munteu</span> &lbrace;
   <span class="c-fn">ngomong</span>(<span class="c-str">"Masih budak"</span>)
 &rbrace; <span class="c-atuh">atuh</span></pre>
-					<div class="window-output">
-						<i class="ph-fill ph-caret-right" style="color: var(--teal)"></i>
-						<span class="output-text typing-anim">Sampurasun, Asep</span>
-					</div>
-				</div>
-				<div class="floating-pill pill-1 glass">
-					<i class="ph-fill ph-map-pin"></i> Dialek Curug
-				</div>
-				<div class="floating-pill pill-2 glass">
-					<i class="ph-fill ph-cpu"></i> Interpreter JS
-				</div>
-				<div class="floating-pill pill-3 glass">
-					<i class="ph-fill ph-globe-hemisphere-west"></i> Web-Based
-				</div>
-			</div>
+				<figcaption class="window-output">
+					<span class="out-label">Hasil</span>
+					<span><span class="prompt" aria-hidden="true">❯</span> Sampurasun, Asep</span>
+					<span><span class="prompt" aria-hidden="true">❯</span> Masih budak</span>
+				</figcaption>
+			</figure>
 		</section>
 
-		<!-- Bento Feature Cards -->
-		<section class="features-section" aria-label="Fitur CRG">
-			<div class="bento-cards">
-				<div class="bento-card bento-wide glass">
-					<div class="bento-icon">
-						<i class="ph-fill ph-code"></i>
-					</div>
-					<h3>Sintaks Sederhana & Ekspresif</h3>
-					<p>Tulis kode pake kata sehari-hari ala Curug. <code>wadah</code> buat variabel, <code>mun/munteu</code> buat kondisi, <code>keur</code> buat looping. Belajar logika tanpa pusing hafalan sintaks asing.</p>
-				</div>
-				<div class="bento-card glass">
-					<div class="bento-icon teal">
-						<i class="ph-fill ph-tree-structure"></i>
-					</div>
-					<h3>AST Parser</h3>
-					<p>Dibangun dengan <strong>Pratt Parser</strong> berbasis AST — mesin nyata, bukan sekadar string matching.</p>
-				</div>
-				<div class="bento-card glass">
-					<div class="bento-icon purple">
-						<i class="ph-fill ph-device-mobile"></i>
-					</div>
-					<h3>Web-Based IDE</h3>
-					<p>Langsung ngoding di browser. Tanpa install. Jalan mulus dari laptop maupun HP.</p>
-				</div>
-				<div class="bento-card glass">
-					<div class="bento-icon orange">
-						<i class="ph-fill ph-lightning"></i>
-					</div>
+		<!-- Fitur -->
+		<section class="features container" aria-labelledby="fitur-title">
+			<div class="section-head">
+				<p class="eyebrow">Naon CRG teh</p>
+				<h2 id="fitur-title">Logika coding, ku basa urang sorangan.</h2>
+			</div>
+			<ul class="bento" role="list">
+				<li class="card wide">
+					<span class="ic"><Icon name="code" size={22} /></span>
+					<h3>Sintaks sederhana &amp; ekspresif</h3>
+					<p>
+						Tulis kode pake kecap sapopoe ala Curug. <code>wadah</code> keur variabel, <code>mun/munteu</code>
+						keur kondisi, <code>keur</code> keur looping. Diajar logika tanpa pusing hafalan sintaks asing.
+					</p>
+				</li>
+				<li class="card">
+					<span class="ic"><Icon name="tree" size={22} /></span>
+					<h3>AST parser</h3>
+					<p>Diwangun ku <strong>Pratt parser</strong> berbasis AST — mesin nyata, lain ukur string matching.</p>
+				</li>
+				<li class="card">
+					<span class="ic"><Icon name="globe" size={22} /></span>
+					<h3>Langsung di browser</h3>
+					<p>Ngoding tanpa install. Jalan mulus di laptop atawa HP.</p>
+				</li>
+				<li class="card">
+					<span class="ic gold"><Icon name="bolt" size={22} /></span>
 					<h3>Postfix <code>jasa</code></h3>
-					<p>Tambahkan <code>jasa</code> di akhir statement buat ngasih napas ekstra. Output terasa lebih gahar khas Curug.</p>
-				</div>
-				<div class="bento-card bento-tall glass">
-					<div class="bento-icon green">
-						<i class="ph-fill ph-plant"></i>
-					</div>
-					<h3>Kearifan Lokal</h3>
-					<p>Terinspirasi dialek asli Curug, Tangerang. Setiap keyword relatable buat warga lokal Sunda Tangerang.</p>
-					<div class="keyword-tags">
-						<span class="tag">wadah</span>
-						<span class="tag">ngomong</span>
-						<span class="tag">mun</span>
-						<span class="tag">keur</span>
-						<span class="tag">jasa</span>
-						<span class="tag">atuh</span>
-						<span class="tag">munteu</span>
-						<span class="tag">bener</span>
-					</div>
-				</div>
-			</div>
+					<p>Tambahkeun <code>jasa</code> di tukang statement: teks meunang "Jasa!", angka dikali 100.</p>
+				</li>
+				<li class="card tall">
+					<span class="ic"><Icon name="leaf" size={22} /></span>
+					<h3>Kearifan lokal</h3>
+					<p>Terinspirasi dialek asli Curug, Tangerang. Unggal kecap konci akrab keur warga Sunda Tangerang.</p>
+					<ul class="tags" role="list">
+						{['wadah', 'ngomong', 'mun', 'munteu', 'keur', 'unggal', 'lakon', 'imah', 'cobaan', 'jasa', 'atuh'].map((t) => <li>{t}</li>)}
+					</ul>
+				</li>
+			</ul>
 		</section>
 
-		<!-- Playground Section -->
-		<section id="playground" class="section">
-			<div class="section-header">
-				<h2>Playground <span class="gradient-text">CRG</span></h2>
-				<p class="section-sub">Ngoding langsung di browser, hasilna kaluar seketika.</p>
+		<!-- Playground -->
+		<section id="playground" class="section container" aria-labelledby="pg-title">
+			<div class="section-head">
+				<p class="eyebrow">Playground</p>
+				<h2 id="pg-title">Ngoding langsung, hasilna kaluar saharita.</h2>
+				<p class="sub">Pencet <kbd>Ctrl</kbd> + <kbd>Enter</kbd> pikeun ngajalankeun kode.</p>
 			</div>
 			<Playground />
 		</section>
 
-		<!-- Kamus Section -->
-		<section id="kamus" class="section">
-			<div class="section-header">
-				<h2>Kamus <span class="gradient-text">Lengkap</span></h2>
-				<p class="section-sub">Sadaya keyword CRG jeung padanan sintaks modern.</p>
+		<!-- Kamus -->
+		<section id="kamus" class="section container" aria-labelledby="kamus-title">
+			<div class="section-head">
+				<p class="eyebrow">Kamus</p>
+				<h2 id="kamus-title">Sadaya kecap konci CRG.</h2>
+				<p class="sub">
+					Unggal kecap aya padanan sintaks modern jeung conto nu bisa langsung dicoba. Label <em>Rencana</em> hartina
+					can dirojong ku interpreter.
+				</p>
 			</div>
 			<Kamus />
 		</section>
-
-		<footer>
-			<div class="footer-brand">
-				<span class="brand-text">CRG</span>
-			</div>
-			<p>Curug Language — Dipersembahkan ku Barudak Curug, Tangerang.</p>
-			<span class="muted">Gampang kaharti, enteng dipake.</span>
-		</footer>
 	</main>
+
+	<footer class="foot">
+		<div class="container foot-inner">
+			<a href="#top" class="foot-logo"><LogoMark size={30} /><span>crg<b>.web.id</b></span></a>
+			<p>Curug Language — basa coding gaya santai khas Sunda Tangerang.</p>
+			<p class="muted">
+				© {year} <a class="credit" href="https://bikindigital.id" rel="author">BikinDigital</a> · Gampang kaharti,
+				enteng dipake.
+			</p>
+		</div>
+	</footer>
 </Layout>
 
 <style>
-	main {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 20px 40px;
-	}
-
 	/* ===== HERO ===== */
 	.hero {
+		position: relative;
+		isolation: isolate;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 60px;
+		grid-template-columns: 1.05fr 0.95fr;
+		gap: 56px;
 		align-items: center;
-		padding: 130px 0 80px;
+		padding-block: clamp(48px, 8vw, 104px) clamp(56px, 8vw, 96px);
 	}
-	.hero-left {
-		display: flex;
-		flex-direction: column;
-	}
-	.badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		background: var(--accent-dim);
-		border: 1px solid var(--border-mid);
-		color: var(--accent);
-		padding: 6px 14px;
-		border-radius: 99px;
-		font-size: 0.82rem;
-		font-weight: 600;
-		margin-bottom: 24px;
-		width: fit-content;
-	}
-	.badge-dot {
-		width: 7px;
-		height: 7px;
-		background: var(--accent);
-		border-radius: 50%;
-		animation: pulse 2s infinite;
-	}
-	@keyframes pulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.4; transform: scale(0.75); }
+	.hero::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background-image: linear-gradient(to right, var(--line) 1px, transparent 1px);
+		background-size: 120px 100%;
+		background-position: center top;
+		mask-image: linear-gradient(to bottom, #000, transparent);
+		opacity: 0.55;
+		pointer-events: none;
 	}
 	h1 {
-		font-size: clamp(2.4rem, 4.5vw, 3.8rem);
-		font-weight: 800;
-		margin: 0 0 20px;
-		line-height: 1.1;
-		letter-spacing: -0.025em;
-		color: var(--text);
+		margin: 24px 0 24px;
+		font-size: clamp(2.75rem, 6.2vw, 5.25rem);
+		font-weight: 700;
+		line-height: 0.95;
+		letter-spacing: -0.05em;
 	}
-	.gradient-text {
-		background: linear-gradient(130deg, var(--accent), var(--teal));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+	.accent { color: var(--link); }
+	.lead {
+		max-width: 48ch;
+		color: var(--muted);
+		font-size: clamp(1.0625rem, 1.5vw, 1.2rem);
+		line-height: 1.55;
 	}
-	.subtitle {
-		color: var(--text-soft);
-		font-size: clamp(0.95rem, 1.8vw, 1.1rem);
-		max-width: 480px;
-		margin: 0 0 36px;
-		line-height: 1.7;
-	}
-	.subtitle strong { color: var(--text); }
-	.hero-actions {
+	.lead strong { color: var(--text); font-weight: 600; }
+	.actions {
 		display: flex;
-		gap: 12px;
 		flex-wrap: wrap;
-		margin-bottom: 40px;
+		gap: 12px;
+		margin-top: 32px;
 	}
-	.btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		padding: 12px 24px;
-		border-radius: 12px;
-		font-weight: 600;
-		text-decoration: none;
-		font-size: 0.95rem;
-		transition: all 0.2s ease;
-	}
-	.btn-primary {
-		background: var(--accent);
-		color: #fff;
-		box-shadow: 0 4px 20px var(--accent-dim);
-	}
-	.btn-primary:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 28px rgba(168, 85, 247, 0.4);
-	}
-	.btn-secondary {
-		background: var(--bg-card);
-		color: var(--text);
-		border: 1px solid var(--border-mid);
-	}
-	.btn-secondary:hover {
-		background: var(--accent-dim);
-		border-color: var(--accent);
-		transform: translateY(-2px);
-	}
-	.hero-stats {
+	.facts {
 		display: flex;
-		align-items: center;
-		gap: 20px;
+		flex-wrap: wrap;
+		gap: 12px 32px;
+		margin-top: 40px;
+		padding-top: 24px;
+		border-top: 1px solid var(--line);
 	}
-	.stat { display: flex; flex-direction: column; }
-	.stat-num {
-		font-size: 1.3rem;
-		font-weight: 800;
-		color: var(--teal);
-		line-height: 1;
+	.facts div { display: flex; flex-direction: column-reverse; gap: 2px; }
+	.facts dt {
+		font-family: var(--font-mono);
+		font-size: 12px;
+		letter-spacing: 0.02em;
+		color: var(--muted);
 	}
-	.stat-label {
-		font-size: 0.76rem;
-		color: var(--text-muted);
-		margin-top: 4px;
-	}
-	.stat-divider {
-		width: 1px;
-		height: 36px;
-		background: var(--border);
+	.facts dd {
+		margin: 0;
+		color: var(--text);
+		font-size: 1.35rem;
+		font-weight: 650;
+		letter-spacing: -0.03em;
 	}
 
-	/* ===== CODE WINDOW ===== */
-	.hero-right { position: relative; }
+	/* ===== CODE WINDOW (selalu gelap) ===== */
 	.code-window {
-		border-radius: 14px;
+		margin: 0;
 		overflow: hidden;
-		position: relative;
-		z-index: 2;
+		border-radius: var(--radius-lg);
+		background: var(--code-bg);
+		box-shadow: var(--shadow-lg), 0 0 0 1px rgb(255 255 255 / 0.04) inset;
 	}
 	.window-bar {
 		display: flex;
 		align-items: center;
-		gap: 10px;
-		padding: 12px 18px;
-		background: var(--bg-surface);
-		border-bottom: 1px solid var(--border);
+		justify-content: space-between;
+		gap: 12px;
+		padding: 14px 20px;
+		background: var(--code-bar);
+		border-bottom: 1px solid var(--code-line);
 	}
-	.dots { display: flex; gap: 6px; }
-	.dot { width: 12px; height: 12px; border-radius: 50%; }
-	.dot.red    { background: #ff5f57; }
-	.dot.yellow { background: #febc2e; }
-	.dot.green  { background: #28c840; }
-	.window-title {
-		font-size: 0.82rem;
-		color: var(--text-muted);
-		font-family: 'JetBrains Mono', monospace;
-		margin: 0 auto;
-	}
-	.window-lang {
-		font-size: 0.72rem;
-		color: var(--accent);
-		background: var(--accent-dim);
-		padding: 2px 8px;
-		border-radius: 4px;
-		font-weight: 700;
-		font-family: 'JetBrains Mono', monospace;
-	}
-	.hero-code {
-		margin: 0;
-		padding: 20px;
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.88rem;
-		line-height: 1.8;
-		white-space: pre;
-		color: var(--text-soft);
-	}
-	.c-comment { color: var(--text-muted); font-style: italic; }
-	.c-kw  { color: var(--accent); font-weight: 700; }
-	.c-fn  { color: var(--teal); }
-	.c-str { color: #86efac; }
-	.c-num { color: #fb923c; }
-	.c-jasa { color: #f59e0b; font-weight: 700; }
-	.c-atuh { color: var(--text-muted); }
-	.window-output {
-		padding: 10px 20px 16px;
-		font-family: 'JetBrains Mono', monospace;
-		font-size: 0.85rem;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		border-top: 1px solid var(--border);
-		background: var(--bg-surface);
-	}
-	.output-text { color: #86efac; }
-	.typing-anim {
-		overflow: hidden;
-		white-space: nowrap;
-		border-right: 2px solid var(--teal);
-		animation: typing 2s steps(18, end) both, blink 0.8s step-end infinite;
-		max-width: 0;
-	}
-	@keyframes typing { to { max-width: 280px; } }
-	@keyframes blink { 50% { border-color: transparent; } }
-
-	/* Floating Pills */
-	.floating-pill {
-		position: absolute;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-		padding: 7px 14px;
-		border-radius: 99px;
-		font-size: 0.82rem;
-		font-weight: 600;
-		color: var(--text-soft);
-		z-index: 3;
-		animation: float 3s ease-in-out infinite;
-	}
-	.floating-pill i { color: var(--accent); }
-	.pill-1 { top: -14px; right: 16px; animation-delay: 0s; }
-	.pill-2 { bottom: 48px; left: -18px; animation-delay: 1.1s; }
-	.pill-3 { top: 44%; right: -20px; animation-delay: 2.2s; }
-	@keyframes float {
-		0%, 100% { transform: translateY(0); }
-		50%       { transform: translateY(-9px); }
-	}
-
-	/* ===== BENTO FEATURE CARDS ===== */
-	.features-section { padding: 20px 0 80px; }
-	.bento-cards {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 16px;
-	}
-	.bento-card {
-		padding: 28px;
-		border-radius: 18px;
-		transition: transform 0.25s, box-shadow 0.25s;
-	}
-	.bento-card:hover {
-		transform: translateY(-4px);
-		box-shadow: 0 16px 48px var(--accent-dim);
-	}
-	.bento-wide { grid-column: span 2; }
-	.bento-tall { grid-row: span 2; }
-	.bento-icon {
-		width: 46px; height: 46px;
-		border-radius: 12px;
-		background: var(--accent-dim);
-		display: flex; align-items: center; justify-content: center;
-		font-size: 1.4rem;
-		color: var(--accent);
-		margin-bottom: 16px;
-	}
-	.bento-icon.teal   { background: var(--teal-dim); color: var(--teal); }
-	.bento-icon.purple { background: var(--accent-dim); color: var(--accent); }
-	.bento-icon.orange { background: rgba(251, 146, 60, 0.12); color: #fb923c; }
-	.bento-icon.green  { background: rgba(134, 239, 172, 0.12); color: #4ade80; }
-	.bento-card h3 {
-		margin: 0 0 10px;
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: var(--text);
-	}
-	.bento-card p {
-		color: var(--text-soft);
-		font-size: 0.88rem;
-		line-height: 1.65;
-		margin: 0;
-	}
-	.keyword-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 7px;
-		margin-top: 18px;
-	}
-	.tag {
-		background: var(--teal-dim);
-		border: 1px solid rgba(45, 212, 191, 0.25);
-		color: var(--teal);
-		padding: 3px 10px;
-		border-radius: 99px;
-		font-size: 0.78rem;
-		font-family: 'JetBrains Mono', monospace;
-		font-weight: 600;
-	}
-
-	/* ===== SECTIONS ===== */
-	.section { padding: 60px 0; }
-	.section-header { text-align: center; margin-bottom: 48px; }
-	.section-header h2 {
-		font-size: clamp(1.8rem, 3.5vw, 2.6rem);
-		font-weight: 800;
-		margin: 0 0 10px;
-		color: var(--text);
-	}
-	.section-sub {
-		color: var(--text-soft);
-		font-size: 1rem;
-		margin: 0;
-	}
-
-	/* ===== FOOTER ===== */
-	footer {
-		text-align: center;
-		margin-top: 80px;
-		padding: 40px 0;
-		color: var(--text-soft);
-		border-top: 1px solid var(--border);
-	}
-	.footer-brand {
+	.file {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		font-size: 1.2rem;
-		font-weight: 800;
-		color: var(--accent);
-		margin-bottom: 12px;
+		color: var(--code-muted);
+		font-family: var(--font-mono);
+		font-size: 13px;
 	}
-	footer p { color: var(--text-soft); font-size: 0.9rem; margin: 0 0 6px; }
-	.brand-text {
-		font-family: 'Space Grotesk', sans-serif;
-		font-weight: 800;
-		font-size: 1.4rem;
-		letter-spacing: -0.04em;
-		background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		filter: drop-shadow(0 0 12px var(--accent-dim));
+	.lang {
+		padding: 3px 10px;
+		border-radius: 9999px;
+		background: rgb(var(--gold-rgb) / 0.16);
+		color: var(--gold);
+		font-family: var(--font-mono);
+		font-size: 11.5px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
 	}
-	.muted { font-size: 0.82rem; color: var(--text-muted); }
+	.hero-code {
+		margin: 0;
+		padding: 22px 24px;
+		overflow-x: auto;
+		color: var(--code-text);
+		font-family: var(--font-mono);
+		font-size: 14px;
+		line-height: 1.8;
+		white-space: pre;
+	}
+	.window-output {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		padding: 14px 24px 18px;
+		border-top: 1px solid var(--code-line);
+		background: var(--code-bar);
+		color: #b8e6a6;
+		font-family: var(--font-mono);
+		font-size: 13.5px;
+	}
+	.out-label {
+		margin-bottom: 4px;
+		color: var(--code-muted);
+		font-size: 11.5px;
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+	}
+	.prompt { color: var(--gold); }
+
+	/* ===== SECTION HEAD ===== */
+	.section-head { max-width: 760px; margin-bottom: 40px; }
+	.section-head h2 {
+		margin-top: 18px;
+		font-size: clamp(2rem, 4.2vw, 3.25rem);
+		font-weight: 700;
+		line-height: 1.02;
+		letter-spacing: -0.045em;
+	}
+	.sub {
+		margin-top: 16px;
+		max-width: 56ch;
+		color: var(--muted);
+		font-size: 1.0625rem;
+	}
+	.sub em { font-style: normal; color: var(--text); font-weight: 550; }
+	kbd {
+		display: inline-block;
+		padding: 1px 8px;
+		border-radius: 6px;
+		background: var(--surface);
+		box-shadow: inset 0 0 0 1px var(--line-2), 0 1px 0 var(--line-2);
+		color: var(--text);
+		font-family: var(--font-mono);
+		font-size: 0.82em;
+	}
+
+	/* ===== FITUR (bento) ===== */
+	.features { padding-block: clamp(56px, 8vw, 104px); }
+	.bento {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 16px;
+		padding: 0;
+		list-style: none;
+	}
+	.card {
+		padding: 28px;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-lg);
+		background: var(--surface);
+		box-shadow: var(--shadow-sm);
+		transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
+	}
+	.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+	.wide { grid-column: span 2; }
+	.tall { grid-row: span 2; }
+	.ic {
+		display: grid;
+		place-items: center;
+		width: 46px;
+		height: 46px;
+		margin-bottom: 20px;
+		border-radius: 14px;
+		color: var(--link);
+		background: var(--brand-soft);
+	}
+	.ic.gold { color: #9a6a00; background: rgb(var(--gold-rgb) / 0.2); }
+	:global([data-theme='dark']) .ic.gold { color: var(--gold); }
+	.card h3 { font-size: 1.15rem; font-weight: 650; letter-spacing: -0.025em; margin-bottom: 8px; }
+	.card p { color: var(--muted); font-size: 0.95rem; line-height: 1.6; }
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		margin-top: 22px;
+		padding: 0;
+		list-style: none;
+	}
+	.tags li {
+		padding: 4px 12px;
+		border-radius: 9999px;
+		background: var(--sunken);
+		box-shadow: inset 0 0 0 1px var(--line);
+		color: var(--text-2);
+		font-family: var(--font-mono);
+		font-size: 13px;
+	}
+
+	.section { padding-block: clamp(56px, 8vw, 104px); }
+
+	/* ===== FOOTER ===== */
+	.foot {
+		margin-top: 40px;
+		padding-block: 40px 48px;
+		border-top: 1px solid var(--line);
+	}
+	.foot-inner { display: flex; flex-direction: column; gap: 6px; }
+	.foot-logo {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		width: fit-content;
+		margin-bottom: 8px;
+		color: var(--text);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+	}
+	.foot-logo b { color: var(--link); }
+	.foot p { color: var(--text-2); font-size: 0.95rem; }
+	.foot .muted { color: var(--muted); font-size: 0.85rem; }
+	.credit {
+		color: var(--link);
+		font-weight: 550;
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 3px;
+	}
+	.credit:hover { text-decoration-thickness: 2px; }
 
 	/* ===== RESPONSIVE ===== */
+	@media (max-width: 960px) {
+		.hero { grid-template-columns: 1fr; gap: 40px; }
+		.bento { grid-template-columns: 1fr 1fr; }
+		.tall { grid-row: auto; }
+	}
 	@media (max-width: 900px) {
-		.hero {
-			grid-template-columns: 1fr;
-			padding: 90px 0 60px;
-			gap: 40px;
-		}
-		.hero-right { display: none; }
-		.bento-cards { grid-template-columns: 1fr 1fr; }
-		.bento-wide { grid-column: span 2; }
-		.bento-tall { grid-row: auto; }
+		.foot { padding-bottom: 120px; }
 	}
 	@media (max-width: 640px) {
-		.bento-cards { grid-template-columns: 1fr; }
-		.bento-wide  { grid-column: span 1; }
-		.hero-actions { flex-direction: column; }
-		main { padding-bottom: 120px; }
-		.hero { padding-top: 80px; }
+		.bento { grid-template-columns: 1fr; }
+		.wide { grid-column: auto; }
+		.actions .btn { flex: 1 1 auto; }
+		.hero-code { font-size: 13px; padding: 18px; }
+		.window-output { padding-inline: 18px; }
 	}
 </style>

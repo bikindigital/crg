@@ -1,45 +1,48 @@
 ---
-const initialCode = `wadah barudak = ["Curug", "Legok", "Bitung", "Legok"]
-ngomong("Sapa barudak kabeh: ") atuh
-
-keur wadah i = 0; i < 3; i = i + 1 {
-  ngomong("Halo " + barudak[i] + " Jasa!") atuh
-}
-
-wadah status = bener
-mun status {
-  ngomong("CRG Gaskeun Geura!") jasa atuh
-} munteu {
-  ngomong("Acan bener bae...") atuh
-}`;
+import Icon from './Icon.astro';
+import { templates } from '../data/templates.js';
 ---
 
-<div class="playground-container">
+<div class="pg">
   <!-- Editor -->
-  <div class="editor-card glass neon-shadow">
-    <div class="card-header">
-      <div class="header-left">
-        <div class="file-dots">
-          <span class="fdot red"></span>
-          <span class="fdot yellow"></span>
-          <span class="fdot green"></span>
+  <div class="panel editor-card">
+    <div class="bar">
+      <div class="bar-left">
+        <span class="file"><Icon name="code" size={15} /> editor.crg</span>
+        <div class="dd" data-dd>
+          <button
+            type="button"
+            class="dd-btn"
+            id="tpl-btn"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="tpl-list"
+          >
+            <span class="dd-label" id="tpl-label">{templates[0].label}</span>
+            <Icon name="chevron" size={16} />
+          </button>
+          <ul class="dd-list" id="tpl-list" role="listbox" aria-label="Pilih conto kode" tabindex="-1" hidden>
+            {
+              templates.map((t, i) => (
+                <li role="option" id={`tpl-${t.value}`} data-value={t.value} aria-selected={i === 0 ? 'true' : 'false'}>
+                  <span>{t.label}</span>
+                  <Icon name="check" size={16} class="tick" />
+                </li>
+              ))
+            }
+          </ul>
         </div>
-        <span class="file-name">editor.crg</span>
-        <select id="template-select" class="template-dropdown">
-          <option value="default">Default CRG</option>
-          <option value="cek_umur">Cek Umur</option>
-        </select>
       </div>
-      <div class="header-right">
-        <button id="copy-btn" class="icon-btn" title="Salin Kode">
-          <i class="ph-fill ph-copy"></i>
+      <div class="bar-right">
+        <button id="copy-btn" class="tool" type="button" aria-label="Salin kode" title="Salin kode">
+          <Icon name="copy" />
         </button>
-        <button id="share-btn" class="icon-btn" title="Bagiin Kode">
-          <i class="ph-fill ph-share-network"></i>
+        <button id="share-btn" class="tool" type="button" aria-label="Salin link kode" title="Salin link kode">
+          <Icon name="share" />
         </button>
-        <button id="run-btn" class="run-button">
-          <i class="ph-fill ph-play"></i>
-          <span>Jalanin Jasa!</span>
+        <button id="run-btn" class="run" type="button">
+          <Icon name="play" size={16} />
+          <span>Jalanin</span>
         </button>
       </div>
     </div>
@@ -47,325 +50,490 @@ mun status {
       <div id="line-numbers" class="line-numbers" aria-hidden="true"></div>
       <div class="editor-wrapper">
         <div id="highlight-layer" class="highlight-layer" aria-hidden="true"></div>
-        <textarea id="editor" spellcheck="false" autocomplete="off">{initialCode}</textarea>
+        <label for="editor" class="visually-hidden">Kode CRG</label>
+        <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off">{templates[0].code}</textarea>
       </div>
     </div>
   </div>
 
   <!-- Terminal -->
-  <div class="terminal-card glass">
-    <div class="card-header">
-      <div class="header-left">
-        <i class="ph-fill ph-terminal-window" style="color: var(--teal)"></i>
-        <span>Terminal Output</span>
+  <div class="panel terminal-card">
+    <div class="bar">
+      <div class="bar-left">
+        <span class="file"><Icon name="terminal" size={15} /> Hasil</span>
       </div>
-      <button id="clear-btn" class="icon-btn" title="Bersihkan Output">
-        <i class="ph-fill ph-eraser"></i>
+      <button id="clear-btn" class="tool" type="button" aria-label="Bersihkeun hasil" title="Bersihkeun hasil">
+        <Icon name="trash" />
       </button>
     </div>
-    <div id="output" class="output-content">
+    <div id="output" class="output" role="log" aria-live="polite">
       <div class="output-welcome">
-        <i class="ph-fill ph-terminal-window"></i>
-        <p>Siap njalankeun kode CRG...</p>
-        <p class="output-hint">Pencet <kbd>Ctrl+Enter</kbd> pikeun gancang!</p>
+        <p>Siap ngajalankeun kode CRG…</p>
+        <p class="hint">Pencet <b>Jalanin</b> atawa Ctrl + Enter.</p>
       </div>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-<!-- Load interpreter as plain script (not bundled by Vite) -->
-<script src="/interpreter.js" is:inline></script>
+<script>
+  import { Interpreter, KEYWORD_LIST, BUILTIN_LIST } from '../lib/interpreter.js';
+  import { templates } from '../data/templates.js';
 
-<!-- Inline script runs synchronously after body is rendered -->
-<script is:inline>
-  (function() {
-    var editor        = document.getElementById('editor');
-    var runBtn        = document.getElementById('run-btn');
-    var copyBtn       = document.getElementById('copy-btn');
-    var shareBtn      = document.getElementById('share-btn');
-    var clearBtn      = document.getElementById('clear-btn');
-    var output        = document.getElementById('output');
-    var templateSel   = document.getElementById('template-select');
-    var lineNumbers   = document.getElementById('line-numbers');
-    var hlLayer       = document.getElementById('highlight-layer');
-    var toast         = document.getElementById('toast');
+  const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T | null;
+  const editor = $<HTMLTextAreaElement>('editor');
+  const runBtn = $('run-btn');
+  const output = $('output');
+  const lineNumbers = $('line-numbers');
+  const hlLayer = $('highlight-layer');
+  const toast = $('toast');
+  const STORE_KEY = 'crg-kode';
 
-    if (!editor || !runBtn || !output) {
-      console.error('[CRG] Elemen teu kapanggih!', {editor: editor, runBtn: runBtn, output: output});
-      return;
+  if (editor && runBtn && output) {
+    const TPL: Record<string, string> = Object.fromEntries(templates.map((t) => [t.value, t.code]));
+
+    // ---- Muat kode: link babagi > draf nu kasimpen > conto baku ----
+    let fromLink = false;
+    try {
+      const q = new URLSearchParams(location.search).get('code');
+      if (q) { editor.value = decodeURIComponent(atob(q)); fromLink = true; }
+    } catch {}
+    if (!fromLink) {
+      try {
+        const saved = localStorage.getItem(STORE_KEY);
+        if (saved) editor.value = saved;
+      } catch {}
     }
 
-    // ---- Templates ----
-    var TPL = {
-      default: editor.value,
-      cek_umur: [
-        'wadah umur = 20',
-        'ngomong("Umur maneh: " + umur) atuh',
-        '',
-        'mun umur > 17 {',
-        '  ngomong("Geus kolot gening!") jasa atuh',
-        '} munteu {',
-        '  ngomong("Masih budak keneh.") atuh',
-        '}'
-      ].join('\n')
-    };
-
-    // Load kode dari URL share
-    try {
-      var qCode = new URLSearchParams(location.search).get('code');
-      if (qCode) editor.value = decodeURIComponent(atob(qCode));
-    } catch(e) {}
-
     // ---- Toast ----
-    function showToast(msg, isError) {
+    let toastTimer: number | undefined;
+    const showToast = (msg: string, isError = false) => {
       if (!toast) return;
       toast.textContent = msg;
       toast.className = 'toast show' + (isError ? ' error' : '');
-      setTimeout(function() { toast.className = 'toast'; }, 2500);
-    }
+      clearTimeout(toastTimer);
+      toastTimer = window.setTimeout(() => (toast.className = 'toast'), 2500);
+    };
 
-    // ---- Syntax highlighting ----
-    var KW = ['wadah','manten','mun','munteu','keur','lakon','balik','bener','salah','bae','nyaho'];
-    var FN = ['ngomong','beja','tanya','nanya'];
+    // ---- Warna sintaks (ditokenisasi, jadi kecap di jero teks teu kawarnaan) ----
+    const KW = new Set(KEYWORD_LIST.filter((k) => !['jasa', 'atuh'].includes(k)));
+    const FN = new Set(BUILTIN_LIST);
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const TOKEN = /(#[^\n]*)|("(?:[^"\\\n]|\\.)*"?|'(?:[^'\\\n]|\\.)*'?)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_À-ɏ][\wÀ-ɏ]*)/g;
 
-    function highlight(code) {
-      var h = code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-      h = h.replace(/"[^"\n]*"|'[^'\n]*'/g, function(s) { return '<span class="hl-str">'+s+'</span>'; });
-      h = h.replace(/\b(\d+\.?\d*)\b/g, '<span class="hl-num">$1</span>');
-      h = h.replace(/\b(jasa)\b/g,  '<span class="hl-jasa">$1</span>');
-      h = h.replace(/\b(atuh)\b/g,  '<span class="hl-atuh">$1</span>');
-      FN.forEach(function(k) { h = h.replace(new RegExp('\\b('+k+')\\b','g'), '<span class="hl-fn">$1</span>'); });
-      KW.forEach(function(k) { h = h.replace(new RegExp('\\b('+k+')\\b','g'), '<span class="hl-kw">$1</span>'); });
-      h = h.replace(/(#[^\n]*)/g, '<span class="hl-comment">$1</span>');
-      return h;
-    }
+    const highlight = (code: string) => {
+      let html = '';
+      let last = 0;
+      for (const m of code.matchAll(TOKEN)) {
+        html += esc(code.slice(last, m.index));
+        const [tok, comment, str, num, word] = m;
+        let cls = '';
+        if (comment) cls = 'hl-comment';
+        else if (str) cls = 'hl-str';
+        else if (num) cls = 'hl-num';
+        else if (word === 'jasa') cls = 'hl-jasa';
+        else if (word === 'atuh') cls = 'hl-atuh';
+        else if (word && KW.has(word)) cls = 'hl-kw';
+        else if (word && FN.has(word)) cls = 'hl-fn';
+        html += cls ? `<span class="${cls}">${esc(tok)}</span>` : esc(tok);
+        last = (m.index ?? 0) + tok.length;
+      }
+      return html + esc(code.slice(last));
+    };
 
-    function renderHL() {
-      if (!hlLayer) return;
-      hlLayer.scrollTop = editor.scrollTop;
-      hlLayer.scrollLeft = editor.scrollLeft;
-      hlLayer.innerHTML = highlight(editor.value) + '\n';
-    }
+    const syncScroll = () => {
+      if (hlLayer) { hlLayer.scrollTop = editor.scrollTop; hlLayer.scrollLeft = editor.scrollLeft; }
+      if (lineNumbers) lineNumbers.scrollTop = editor.scrollTop;
+    };
+    const refresh = () => {
+      if (hlLayer) hlLayer.innerHTML = highlight(editor.value) + '\n';
+      if (lineNumbers) {
+        const n = editor.value.split('\n').length;
+        lineNumbers.innerHTML = Array.from({ length: n }, (_, i) => `<span>${i + 1}</span>`).join('');
+      }
+      syncScroll();
+    };
 
-    function renderLN() {
-      if (!lineNumbers) return;
-      var n = editor.value.split('\n').length;
-      lineNumbers.innerHTML = Array.from({length:n}, function(_,i){ return '<span>'+(i+1)+'</span>'; }).join('');
-      lineNumbers.scrollTop = editor.scrollTop;
-    }
+    let saveTimer: number | undefined;
+    const save = () => {
+      clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => {
+        try { localStorage.setItem(STORE_KEY, editor.value); } catch {}
+      }, 400);
+    };
+    const setCode = (code: string) => {
+      editor.value = code;
+      editor.scrollTop = 0;
+      refresh();
+      save();
+    };
 
-    editor.addEventListener('input', function() { renderHL(); renderLN(); });
-    editor.addEventListener('scroll', function() {
-      if (hlLayer)      hlLayer.scrollTop      = editor.scrollTop;
-      if (lineNumbers)  lineNumbers.scrollTop  = editor.scrollTop;
-    });
-    renderHL(); renderLN();
+    editor.addEventListener('input', () => { refresh(); save(); });
+    editor.addEventListener('scroll', syncScroll);
+    refresh();
 
-    // ---- Template switch ----
-    if (templateSel) {
-      templateSel.addEventListener('change', function(e) {
-        var v = e.target.value;
-        if (TPL[v]) { editor.value = TPL[v]; renderHL(); renderLN(); }
+    // ---- Dropdown conto (custom, lain <select> bawaan) ----
+    const dd = document.querySelector<HTMLElement>('[data-dd]');
+    const ddBtn = $<HTMLButtonElement>('tpl-btn');
+    const ddList = $<HTMLUListElement>('tpl-list');
+    const ddLabel = $('tpl-label');
+    const options = ddList ? [...ddList.querySelectorAll<HTMLLIElement>('[role="option"]')] : [];
+    let activeIdx = 0;
+
+    const setActive = (i: number) => {
+      activeIdx = (i + options.length) % options.length;
+      options.forEach((o, j) => o.classList.toggle('active', j === activeIdx));
+      ddList?.setAttribute('aria-activedescendant', options[activeIdx].id);
+      options[activeIdx].scrollIntoView({ block: 'nearest' });
+    };
+    const openDD = () => {
+      if (!ddList || !ddBtn) return;
+      ddList.hidden = false;
+      ddBtn.setAttribute('aria-expanded', 'true');
+      const sel = options.findIndex((o) => o.getAttribute('aria-selected') === 'true');
+      setActive(sel < 0 ? 0 : sel);
+      ddList.focus();
+    };
+    const closeDD = (focusBtn: boolean) => {
+      if (!ddList || !ddBtn) return;
+      ddList.hidden = true;
+      ddBtn.setAttribute('aria-expanded', 'false');
+      if (focusBtn) ddBtn.focus();
+    };
+    const choose = (i: number) => {
+      const o = options[i];
+      options.forEach((x) => x.setAttribute('aria-selected', x === o ? 'true' : 'false'));
+      if (ddLabel) ddLabel.textContent = o.textContent?.trim() ?? '';
+      const v = o.dataset.value ?? '';
+      if (TPL[v]) setCode(TPL[v]);
+      closeDD(true);
+    };
+
+    if (dd && ddBtn && ddList) {
+      ddBtn.addEventListener('click', () => (ddList.hidden ? openDD() : closeDD(true)));
+      ddBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); openDD(); }
+      });
+      ddList.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); setActive(activeIdx + 1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(activeIdx - 1); }
+        else if (e.key === 'Home') { e.preventDefault(); setActive(0); }
+        else if (e.key === 'End') { e.preventDefault(); setActive(options.length - 1); }
+        else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(activeIdx); }
+        else if (e.key === 'Escape') { e.preventDefault(); closeDD(true); }
+        else if (e.key === 'Tab') closeDD(false);
+      });
+      options.forEach((o, i) => {
+        o.addEventListener('click', () => choose(i));
+        o.addEventListener('mousemove', () => { if (activeIdx !== i) setActive(i); });
+      });
+      document.addEventListener('click', (e) => {
+        if (!ddList.hidden && !dd.contains(e.target as Node)) closeDD(false);
       });
     }
 
-    // ---- Run ----
-    function runCode() {
+    // ---- Jalankeun ----
+    const line = (text: string, cls = '') => {
+      const div = document.createElement('div');
+      div.className = 'out-line' + (cls ? ' ' + cls : '');
+      const p = document.createElement('span');
+      p.className = 'out-prompt';
+      p.setAttribute('aria-hidden', 'true');
+      p.textContent = '❯ ';
+      div.append(p, document.createTextNode(text));
+      output.appendChild(div);
+    };
+
+    const runCode = () => {
       output.innerHTML = '';
-      var t0 = performance.now();
-      try {
-        var interp = new Interpreter(function(msg) {
-          var div = document.createElement('div');
-          div.className = 'output-line';
-          var prompt = document.createElement('span');
-          prompt.className = 'out-prompt';
-          prompt.textContent = '\u276f ';
-          div.appendChild(prompt);
-          div.appendChild(document.createTextNode(String(msg)));
-          output.appendChild(div);
-          output.scrollTop = output.scrollHeight;
-        });
-        interp.execute(editor.value);
-      } catch(err) {
-        var errDiv = document.createElement('div');
-        errDiv.className = 'output-line';
-        errDiv.style.color = '#f87171';
-        errDiv.textContent = 'Kagok! ' + err.message;
-        output.appendChild(errDiv);
-      }
-      var footer = document.createElement('div');
-      footer.className = 'output-footer';
-      footer.textContent = 'Selesai dalam ' + (performance.now()-t0).toFixed(1) + 'ms';
-      output.appendChild(footer);
-    }
+      const t0 = performance.now();
+      const interp = new Interpreter(
+        (msg: string) => line(String(msg), /^(Kagok|=>)/.test(String(msg)) ? 'err' : ''),
+        { input: (q: string) => window.prompt(q || 'Asupkeun jawaban:') },
+      );
+      const res = interp.execute(editor.value);
+      const foot = document.createElement('div');
+      foot.className = 'out-foot';
+      foot.textContent = `${res.ok ? 'Beres' : 'Eureun'} dina ${(performance.now() - t0).toFixed(1)} ms · ${res.steps.toLocaleString('id-ID')} langkah`;
+      output.appendChild(foot);
+      output.scrollTop = output.scrollHeight;
+    };
 
     runBtn.addEventListener('click', runCode);
-
-    editor.addEventListener('keydown', function(e) {
-      if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); return; }
-      if (e.key === 'Tab') {
+    editor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); runCode(); return; }
+      if (e.key === 'Tab' && !e.shiftKey) {
         e.preventDefault();
-        var s = editor.selectionStart, en = editor.selectionEnd;
-        editor.value = editor.value.substring(0,s) + '  ' + editor.value.substring(en);
+        const s = editor.selectionStart;
+        const en = editor.selectionEnd;
+        editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(en);
         editor.selectionStart = editor.selectionEnd = s + 2;
-        renderHL(); renderLN();
+        refresh();
+        save();
       }
     });
 
-    if (copyBtn) {
-      copyBtn.addEventListener('click', function() {
-        navigator.clipboard.writeText(editor.value)
-          .then(function() { showToast('Kode berhasil disalin!'); })
-          .catch(function() { showToast('Gagal nyalin', true); });
-      });
-    }
+    // ---- Tombol "Coba" ti Kamus ----
+    window.addEventListener('crg:coba', (e) => {
+      const code = (e as CustomEvent<string>).detail;
+      if (typeof code !== 'string') return;
+      setCode(code);
+      document.getElementById('playground')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      runCode();
+    });
 
-    if (shareBtn) {
-      shareBtn.addEventListener('click', function() {
-        try {
-          var enc = btoa(encodeURIComponent(editor.value));
-          navigator.clipboard.writeText(location.origin + location.pathname + '?code=' + enc)
-            .then(function() { showToast('Link disalin! Bagiin ke babaturan!'); });
-        } catch(e) { showToast('Gagal bikin link', true); }
-      });
-    }
-
-    if (clearBtn) {
-      clearBtn.addEventListener('click', function() {
-        output.innerHTML = '<div class="output-welcome"><i class="ph-fill ph-terminal-window"></i><p>Output dibersihkan.</p></div>';
-      });
-    }
-  })();
+    $('copy-btn')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(editor.value)
+        .then(() => showToast('Kode geus disalin'))
+        .catch(() => showToast('Gagal nyalin', true));
+    });
+    $('share-btn')?.addEventListener('click', () => {
+      try {
+        const enc = btoa(encodeURIComponent(editor.value));
+        navigator.clipboard.writeText(`${location.origin}${location.pathname}?code=${enc}#playground`)
+          .then(() => showToast('Link disalin — bagikeun ka babaturan!'))
+          .catch(() => showToast('Gagal nyalin link', true));
+      } catch {
+        showToast('Gagal nyieun link', true);
+      }
+    });
+    $('clear-btn')?.addEventListener('click', () => {
+      output.innerHTML = '<div class="output-welcome"><p>Hasil geus dibersihkeun.</p></div>';
+    });
+  }
 </script>
 
 <style>
-  .playground-container {
+  .pg {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    height: 600px;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 16px;
+    height: 560px;
   }
-  .editor-card, .terminal-card {
+  .panel {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
+    background: var(--code-bg);
+    box-shadow: var(--shadow-lg);
   }
-  .card-header {
-    padding: 10px 16px;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border);
+  .editor-card { overflow: visible; }
+  .bar {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px 10px 18px;
+    background: var(--code-bar);
+    border-bottom: 1px solid var(--code-line);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   }
-  .header-left, .header-right { display: flex; align-items: center; gap: 8px; }
-  .file-dots { display: flex; gap: 5px; }
-  .fdot { width: 11px; height: 11px; border-radius: 50%; }
-  .fdot.red    { background: #ff5f57; }
-  .fdot.yellow { background: #febc2e; }
-  .fdot.green  { background: #28c840; }
-  .file-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); }
-  .template-dropdown {
-    background: var(--bg-card); color: var(--text-soft); border: 1px solid var(--border);
-    padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-family: inherit;
-    outline: none; cursor: pointer; transition: all 0.2s;
-    max-width: 140px;
+  .bar-left, .bar-right { display: flex; align-items: center; gap: 8px; }
+  .bar-right { margin-left: auto; }
+  .file {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--code-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
   }
-  .template-dropdown:hover { border-color: var(--teal); color: var(--text); background: var(--accent-dim); }
-  .template-dropdown option { background: var(--bg-surface); color: var(--text); }
-  .icon-btn {
-    background: var(--accent-dim); color: var(--text-muted); border: 1px solid var(--border);
-    width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; transition: all 0.2s;
-  }
-  .icon-btn:hover { background: var(--accent); color: white; border-color: transparent; transform: scale(1.08); }
-  .run-button {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--accent); color: white; border: none;
-    padding: 7px 16px; border-radius: 8px; cursor: pointer;
-    font-weight: 600; font-size: 0.88rem; font-family: inherit; transition: all 0.2s;
-  }
-  .run-button:hover { transform: translateY(-2px); box-shadow: 0 4px 14px var(--accent-dim); }
-  .run-button:active { transform: scale(0.97); }
 
-  /* Editor body */
-  .editor-body { display: flex; flex: 1; overflow: hidden; }
+  /* Dropdown custom */
+  .dd { position: relative; }
+  .dd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 12px 0 14px;
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.06);
+    box-shadow: inset 0 0 0 1px var(--code-line);
+    color: var(--code-text);
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: background-color 0.18s ease;
+  }
+  .dd-btn:hover { background: rgb(255 255 255 / 0.1); }
+  .dd-btn[aria-expanded='true'] :global(svg) { transform: rotate(180deg); }
+  .dd-btn :global(svg) { transition: transform 0.2s var(--ease); color: var(--code-muted); }
+  .dd-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 20;
+    min-width: 220px;
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    outline: none;
+  }
+  .dd-list[role='listbox']:focus-visible { box-shadow: var(--shadow-lg), 0 0 0 2px var(--link); }
+  .dd-list li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    color: var(--text-2);
+    font-size: 14px;
+  }
+  .dd-list li.active { background: var(--sunken); color: var(--text); }
+  .dd-list li[aria-selected='true'] { color: var(--link); font-weight: 550; }
+  .dd-list li :global(.tick) { visibility: hidden; }
+  .dd-list li[aria-selected='true'] :global(.tick) { visibility: visible; }
+
+  .tool {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    color: var(--code-muted);
+    transition: background-color 0.18s ease, color 0.18s ease;
+  }
+  .tool:hover { background: rgb(255 255 255 / 0.08); color: var(--code-text); }
+  .run {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 9999px;
+    background: var(--gold);
+    color: var(--on-gold);
+    font-size: 14px;
+    font-weight: 600;
+    transition: filter 0.18s ease, transform 0.18s var(--ease);
+  }
+  .run:hover { filter: brightness(1.05); }
+  .run:active { transform: scale(0.97); }
+
+  /* Editor */
+  .editor-body { display: flex; flex: 1; min-height: 0; overflow: hidden; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
   .line-numbers {
-    width: 44px; flex-shrink: 0; padding: 14px 0; text-align: right;
-    font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 1.6;
-    color: var(--text-muted); overflow: hidden; user-select: none;
-    border-right: 1px solid var(--border); background: var(--bg-surface); opacity: 0.5;
+    flex-shrink: 0;
+    width: 44px;
+    padding: 16px 0;
+    overflow: hidden;
+    text-align: right;
+    border-right: 1px solid var(--code-line);
+    color: var(--code-muted);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.7;
+    opacity: 0.6;
+    user-select: none;
   }
-  .line-numbers span { display: block; padding-right: 10px; }
+  .line-numbers :global(span) { display: block; padding-right: 10px; }
   .editor-wrapper { position: relative; flex: 1; overflow: hidden; }
-  .highlight-layer, #editor {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%; margin: 0;
-    padding: 14px; font-family: 'JetBrains Mono', monospace;
-    font-size: 0.9rem; line-height: 1.6; tab-size: 2;
-    white-space: pre; overflow: auto; box-sizing: border-box;
+  .highlight-layer,
+  #editor {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.7;
+    tab-size: 2;
+    white-space: pre;
+    overflow: auto;
   }
-  .highlight-layer { color: transparent; pointer-events: none; z-index: 1; overflow: hidden; }
-  #editor { background: transparent; border: none; color: var(--text-soft); resize: none; outline: none; caret-color: var(--teal); z-index: 2; }
+  .highlight-layer { z-index: 1; overflow: hidden; color: var(--code-text); pointer-events: none; }
+  #editor {
+    z-index: 2;
+    border: 0;
+    resize: none;
+    outline: none;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--gold);
+  }
+  #editor::selection { background: rgb(var(--gold-rgb) / 0.3); color: transparent; }
+  .editor-wrapper:focus-within { box-shadow: inset 0 0 0 2px rgb(95 203 187 / 0.5); }
 
-  /* Syntax colors */
-  :global(.hl-kw)      { color: var(--accent); font-weight: 700; }
-  :global(.hl-fn)      { color: var(--teal); }
-  :global(.hl-str)     { color: #86efac; }
-  :global(.hl-num)     { color: #fb923c; }
-  :global(.hl-jasa)    { color: #f59e0b; font-weight: 700; }
-  :global(.hl-atuh)    { color: var(--text-muted); }
-  :global(.hl-comment) { color: var(--text-muted); font-style: italic; }
-
-  /* Terminal */
-  .output-content {
-    flex: 1; padding: 14px; font-family: 'JetBrains Mono', monospace;
-    font-size: 0.88rem; overflow-y: auto; background: var(--bg-surface);
-    display: flex; flex-direction: column; gap: 2px;
+  /* Hasil */
+  .output {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 18px;
+    overflow-y: auto;
+    color: var(--code-text);
+    font-family: var(--font-mono);
+    font-size: 13.5px;
   }
-  .output-welcome {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    height: 100%; gap: 8px; color: var(--text-muted); font-size: 0.88rem; text-align: center; opacity: 0.7;
+  .output :global(.output-welcome) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 100%;
+    color: var(--code-muted);
+    text-align: center;
   }
-  .output-welcome i { font-size: 2rem; opacity: 0.3; }
-  .output-welcome p { margin: 0; }
-  .output-hint { font-size: 0.8rem; }
-  .output-welcome kbd { background: var(--bg-card); border: 1px solid var(--border-mid); padding: 2px 7px; border-radius: 4px; font-size: 0.78rem; }
-  .output-line { line-height: 1.6; color: var(--text); padding: 1px 0; }
-  .out-prompt { color: var(--teal); font-weight: 700; }
-  .output-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 0.78rem; }
+  .output :global(.hint) { font-size: 12.5px; }
+  .output :global(.hint b) { color: var(--gold); font-weight: 600; }
+  .output :global(.out-line) { line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+  .output :global(.out-line.err) { color: #ff9b8a; }
+  .output :global(.out-prompt) { color: var(--gold); }
+  .output :global(.out-foot) {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--code-line);
+    color: var(--code-muted);
+    font-size: 12px;
+  }
 
   /* Toast */
   .toast {
-    position: fixed; bottom: 100px; left: 50%;
-    transform: translateX(-50%) translateY(16px);
-    background: var(--bg-surface); backdrop-filter: blur(12px);
-    border: 1px solid var(--border-mid); color: var(--text);
-    padding: 11px 22px; border-radius: 12px; font-size: 0.9rem; font-weight: 500;
-    opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 9999;
-    white-space: nowrap; font-family: 'JetBrains Mono', monospace;
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    z-index: 100;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    background: var(--text);
+    color: var(--canvas);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateX(-50%) translateY(12px);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s var(--ease);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .toast.error { border-color: rgba(239,68,68,0.5); color: #f87171; }
+  .toast.error { background: #b42318; color: #fff; }
 
-  @media (max-width: 768px) {
-    .playground-container { grid-template-columns: 1fr; height: auto; gap: 15px; }
-    .editor-card { height: 450px; }
-    .terminal-card { height: 350px; }
-    .card-header { padding: 12px; }
-    .header-left { flex: 1; min-width: 150px; }
-    .header-right { flex: 0; }
-    .template-dropdown { max-width: 110px; font-size: 0.75rem; }
-    .run-button { padding: 8px 12px; font-size: 0.8rem; }
-    .run-button span { display: none; } /* Hide text, keep icon and shorthand if needed */
-    .run-button::after { content: 'Jalanin!'; } /* Shorter text for mobile */
+  @media (max-width: 900px) {
+    .pg { grid-template-columns: 1fr; height: auto; }
+    .editor-card { height: 440px; }
+    .terminal-card { height: 300px; }
+    .toast { bottom: calc(100px + env(safe-area-inset-bottom)); }
   }
   @media (max-width: 480px) {
-    .header-left { flex-direction: column; align-items: flex-start; gap: 10px; }
-    .header-right { width: 100%; justify-content: flex-end; }
-    .file-name { order: -1; font-size: 0.75rem; }
+    .bar { padding-left: 12px; }
+    .editor-card .file { display: none; }
+    .bar-right { gap: 2px; }
   }
 </style>
