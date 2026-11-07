@@ -1,12 +1,23 @@
 ---
+import { Font } from 'astro:assets';
+
 interface Props {
 	title: string;
+	description?: string;
+	/** true = halaman teu diindeks (conto: 404) */
+	noindex?: boolean;
+	/** data terstruktur JSON-LD tambahan */
+	jsonLd?: Record<string, unknown>;
 }
 
-const { title } = Astro.props;
-const description =
-	'CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang — gampang kaharti jeung enteng dipake.';
+const {
+	title,
+	description = 'CRG (Curug Language) nyaeta basa coding gaya santai khas Sunda Tangerang — gampang kaharti jeung enteng dipake. Coba langsung di browser.',
+	noindex = false,
+	jsonLd,
+} = Astro.props;
 const site = (Astro.site?.href ?? 'https://crg.web.id/').replace(/\/$/, '');
+const pageUrl = new URL(Astro.url.pathname, `${site}/`).href;
 const ogImage = `${site}/thumbnail.png`;
 ---
 
@@ -21,10 +32,15 @@ const ogImage = `${site}/thumbnail.png`;
 		<meta name="author" content="BikinDigital" />
 		<meta name="copyright" content={`© ${new Date().getFullYear()} BikinDigital`} />
 		<link rel="author" href="https://bikindigital.id" />
+		{noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={pageUrl} />}
+
+		<!-- Font di-host sorangan (teu ngantosan Google Fonts), dipreload, jeung boga fallback metrik -->
+		<Font cssVariable="--font-sans" preload />
+		<Font cssVariable="--font-mono" />
 
 		<!-- Open Graph / Twitter -->
 		<meta property="og:type" content="website" />
-		<meta property="og:url" content={site} />
+		<meta property="og:url" content={pageUrl} />
 		<meta property="og:site_name" content="CRG — Curug Language" />
 		<meta property="og:locale" content="id_ID" />
 		<meta property="og:title" content={title} />
@@ -38,18 +54,13 @@ const ogImage = `${site}/thumbnail.png`;
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
 		<meta name="theme-color" content="#f7f8f5" />
-		<link rel="canonical" href={site} />
 
 		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 		<link rel="icon" href="/favicon.ico" sizes="48x48" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link
-			href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@400;500;600&display=swap"
-			rel="stylesheet"
-		/>
+		<link rel="sitemap" href="/sitemap.xml" />
+		{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 		<!-- Tema dipasang sebelum render supaya tidak berkedip -->
 		<script is:inline>
 			(function () {
@@ -63,7 +74,7 @@ const ogImage = `${site}/thumbnail.png`;
 		</script>
 	</head>
 	<body>
-		<a class="skip-link" href="#playground">Langsung ka Playground</a>
+		<a class="skip-link" href="#top">Langsung ka eusi</a>
 		<slot />
 	</body>
 </html>
@@ -101,8 +112,6 @@ const ogImage = `${site}/thumbnail.png`;
 		--code-text: #d9e4df;
 		--code-muted: #7f938c;
 
-		--font-sans: 'Geist', system-ui, sans-serif;
-		--font-mono: 'Geist Mono', ui-monospace, monospace;
 
 		--shadow-sm: 0 1px 2px rgb(23 43 39 / 0.06);
 		--shadow-md: 0 1px 2px rgb(23 43 39 / 0.04), 0 12px 32px -12px rgb(23 43 39 / 0.16);

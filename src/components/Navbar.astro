@@ -5,16 +5,16 @@ import LogoMark from './LogoMark.astro';
 
 <header class="hdr" data-hdr>
   <div class="container bar">
-    <a href="#top" class="logo" aria-label="CRG, ka luhur">
+    <a href="/#top" class="logo" aria-label="CRG, ka luhur">
       <LogoMark size={34} />
       <span class="word">crg<b>.web.id</b></span>
     </a>
 
     <nav class="nav" aria-label="Navigasi utama (desktop)">
       <ul role="list">
-        <li><a href="#top" data-nav="top">Beranda</a></li>
-        <li><a href="#playground" data-nav="playground">Playground</a></li>
-        <li><a href="#kamus" data-nav="kamus">Kamus</a></li>
+        <li><a href="/#top" data-nav="top">Beranda</a></li>
+        <li><a href="/#playground" data-nav="playground">Playground</a></li>
+        <li><a href="/#kamus" data-nav="kamus">Kamus</a></li>
       </ul>
     </nav>
 
@@ -23,7 +23,7 @@ import LogoMark from './LogoMark.astro';
         <Icon name="moon" class="i-moon" />
         <Icon name="sun" class="i-sun" />
       </button>
-      <a class="btn btn-primary cta" href="#playground">
+      <a class="btn btn-primary cta" href="/#playground">
         <Icon name="play" size={16} />
         Coba Ayeuna
       </a>
@@ -34,9 +34,9 @@ import LogoMark from './LogoMark.astro';
 <!-- Navigasi bawah ala aplikasi (HP), bar melayang berbentuk pill -->
 <nav class="bnav" aria-label="Navigasi utama">
   <ul role="list">
-    <li><a href="#top" data-nav="top"><Icon name="home" size={22} /><span>Beranda</span></a></li>
-    <li><a href="#playground" data-nav="playground"><Icon name="terminal" size={22} /><span>Playground</span></a></li>
-    <li><a href="#kamus" data-nav="kamus"><Icon name="book" size={22} /><span>Kamus</span></a></li>
+    <li><a href="/#top" data-nav="top"><Icon name="home" size={22} /><span>Beranda</span></a></li>
+    <li><a href="/#playground" data-nav="playground"><Icon name="terminal" size={22} /><span>Playground</span></a></li>
+    <li><a href="/#kamus" data-nav="kamus"><Icon name="book" size={22} /><span>Kamus</span></a></li>
   </ul>
 </nav>
 
@@ -190,8 +190,11 @@ import LogoMark from './LogoMark.astro';
   const links = document.querySelectorAll<HTMLAnchorElement>('[data-nav]');
   const ids = ['playground', 'kamus'];
 
+  const onHome = location.pathname === '/';
+
   function update() {
     hdr?.classList.toggle('scrolled', window.scrollY > 8);
+    if (!onHome) return; // di kaca sejen (404) euweuh menu nu aktif
     let current = 'top';
     for (const id of ids) {
       const el = document.getElementById(id);

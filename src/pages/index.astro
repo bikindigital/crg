@@ -8,9 +8,43 @@ import LogoMark from '../components/LogoMark.astro';
 import { totalAktif } from '../data/kamus';
 
 const year = new Date().getFullYear();
+const site = 'https://crg.web.id/';
+
+// Data terstruktur keur Google: situs + aplikasi web (gratis, dijalankeun di browser)
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'WebSite',
+			'@id': `${site}#website`,
+			url: site,
+			name: 'CRG — Curug Language',
+			inLanguage: 'id',
+			publisher: { '@id': 'https://bikindigital.id/#organization' },
+		},
+		{
+			'@type': 'Organization',
+			'@id': 'https://bikindigital.id/#organization',
+			name: 'BikinDigital',
+			url: 'https://bikindigital.id',
+		},
+		{
+			'@type': 'WebApplication',
+			name: 'CRG Playground',
+			url: `${site}#playground`,
+			applicationCategory: 'DeveloperApplication',
+			operatingSystem: 'Browser',
+			description:
+				'Basa coding gaya santai khas Sunda Tangerang. Tulis jeung jalankeun kode CRG langsung di browser, tanpa install.',
+			offers: { '@type': 'Offer', price: '0', priceCurrency: 'IDR' },
+			author: { '@id': 'https://bikindigital.id/#organization' },
+			image: `${site}thumbnail.png`,
+		},
+	],
+};
 ---
 
-<Layout title="CRG — Curug Language">
+<Layout title="CRG — Basa Coding Sunda Tangerang (Curug Language)" jsonLd={jsonLd}>
 	<Navbar />
 	<main id="top">
 		<!-- Hero -->
